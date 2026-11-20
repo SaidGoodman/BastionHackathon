@@ -1,0 +1,221 @@
+{
+  "schema_version": "1.1",
+  "session_id": "example-F07",
+  "status": "completed",
+  "networks": [
+    {
+      "id": "open",
+      "name": "Офисная сеть",
+      "trust": "open",
+      "declared_trust": "open"
+    },
+    {
+      "id": "closed",
+      "name": "Сеть цеха",
+      "trust": "closed",
+      "declared_trust": "closed"
+    }
+  ],
+  "firewall": {
+    "side": "open",
+    "existing": null,
+    "name": null
+  },
+  "synonyx": {
+    "location": "closed",
+    "node_a_faces": "open",
+    "node_b_faces": "closed"
+  },
+  "rules": [
+    {
+      "id": 1,
+      "type": "data",
+      "from": "closed",
+      "to": "open",
+      "mode": "two-way",
+      "description": "Показания датчиков с брокера цеха на брокер офиса",
+      "justification": "Для MQTT однонаправленного режима нет — правило всегда двунаправленное; запрос и ответ идут в одном правиле. Полезные сообщения идут в одну сторону, но для MQTT однонаправленного режима нет — правило двунаправленное; что можно передавать, ограничивает политика фильтрации (топики).",
+      "senders": [
+        "MQTT-брокер цеха"
+      ],
+      "receivers": [
+        "MQTT-брокер офиса"
+      ],
+      "unknowns": [
+        "порт"
+      ],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.1. Правила передачи данных"
+        },
+        {
+          "file": "01_scope_functions_synonyx_1.9.md",
+          "section": "4. Передача данных — Протоколы и режимы"
+        }
+      ],
+      "protocol": "MQTT",
+      "port": null,
+      "collect_side": "closed",
+      "exchange_side": "open"
+    },
+    {
+      "id": 2,
+      "type": "data",
+      "from": "open",
+      "to": "closed",
+      "mode": "one-way",
+      "description": "Синхронизация времени",
+      "justification": "Синхронизация времени по методике — одно однонаправленное правило от источника времени к защищаемой сети; число синхронизируемых устройств на расчёт не влияет.",
+      "senders": [
+        "Сервер времени офиса"
+      ],
+      "receivers": [
+        "Сервер времени цеха"
+      ],
+      "unknowns": [],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.1. Правила передачи данных"
+        },
+        {
+          "file": "02_methodology.md",
+          "section": "3.3. Направление и режим правила"
+        }
+      ],
+      "protocol": "UDP",
+      "port": 123,
+      "time_sync": true,
+      "collect_side": "open",
+      "exchange_side": "closed"
+    },
+    {
+      "id": 3,
+      "type": "file",
+      "from": "open",
+      "to": "closed",
+      "mode": "one-way",
+      "description": "Обновления с флешки на файловый сервер цеха",
+      "justification": "Один набор проверок на каждой стороне и общая видимость принятых файлов — одно правило. Способы и протоколы на двух сторонах выбираются независимо и на число правил не влияют. Флешка подключается к USB-порту Узла А, поток с неё идёт прямо на Узел А, минуя межсетевой экран. Антивирус, песочница и DLP — внешние системы, подключаемые по ICAP; встроенного антивируса в «Синониксе» нет.",
+      "senders": [],
+      "receivers": [
+        "Файловый сервер цеха"
+      ],
+      "unknowns": [],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.2. Правила передачи файлов"
+        },
+        {
+          "file": "01_scope_functions_synonyx_1.9.md",
+          "section": "5. Передача файлов — Способы передачи"
+        },
+        {
+          "file": "01_scope_functions_synonyx_1.9.md",
+          "section": "5. Передача файлов — Проверки файлов"
+        }
+      ],
+      "protocol": {
+        "open": "USB-носитель на Узле А",
+        "closed": "SMB, автоматически при поступлении (PUSH)"
+      },
+      "checks": [
+        "ICAP: внешний антивирус"
+      ],
+      "methods": {
+        "open": [
+          "USB-носитель на Узле А"
+        ],
+        "closed": [
+          "SMB, автоматически при поступлении (PUSH)"
+        ]
+      },
+      "pull": false,
+      "usb": true
+    }
+  ],
+  "rules_count": 3,
+  "file_users_count": 1,
+  "file_users_range": null,
+  "file_users_breakdown": [
+    "«Обновления с флешки на файловый сервер цеха»: 1 чел. (подрядчик)",
+    "Автоматическая доставка (PUSH) пользователя не требует."
+  ],
+  "requests_for_vendor": [],
+  "requests_for_vendor_details": [],
+  "unknowns": [
+    {
+      "path": "flow:f1:port",
+      "text": "«Показания датчиков с брокера цеха на брокер офиса»: порт не указан.",
+      "affectsResult": false
+    }
+  ],
+  "assumptions": [],
+  "devices": [
+    {
+      "id": "broker-office",
+      "network_id": "open",
+      "name": "MQTT-брокер офиса"
+    },
+    {
+      "id": "ntp-office",
+      "network_id": "open",
+      "name": "Сервер времени офиса"
+    },
+    {
+      "id": "broker-shop",
+      "network_id": "closed",
+      "name": "MQTT-брокер цеха"
+    },
+    {
+      "id": "ntp-shop",
+      "network_id": "closed",
+      "name": "Сервер времени цеха"
+    },
+    {
+      "id": "fileserver",
+      "network_id": "closed",
+      "name": "Файловый сервер цеха"
+    }
+  ],
+  "issues": [],
+  "sources": [
+    {
+      "file": "02_methodology.md",
+      "section": "2. Размещение"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.1. Правила передачи данных"
+    },
+    {
+      "file": "01_scope_functions_synonyx_1.9.md",
+      "section": "4. Передача данных — Протоколы и режимы"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.3. Направление и режим правила"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.2. Правила передачи файлов"
+    },
+    {
+      "file": "01_scope_functions_synonyx_1.9.md",
+      "section": "5. Передача файлов — Как настраивается правило передачи файлов"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "7. Дополнительное задание"
+    }
+  ],
+  "usage": {
+    "status": "not_measured"
+  },
+  "timing": {
+    "turns": [],
+    "mean_turn_seconds": null
+  }
+}

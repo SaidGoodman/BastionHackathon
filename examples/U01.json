@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.1",
+  "session_id": "example-U01",
+  "status": "completed",
+  "networks": [
+    {
+      "id": "open",
+      "name": "Офисная сеть",
+      "trust": "open",
+      "declared_trust": "open"
+    },
+    {
+      "id": "closed",
+      "name": "Сеть цеха",
+      "trust": "closed",
+      "declared_trust": "closed"
+    }
+  ],
+  "firewall": {
+    "side": "open",
+    "existing": null,
+    "name": null
+  },
+  "synonyx": {
+    "location": "closed",
+    "node_a_faces": "open",
+    "node_b_faces": "closed"
+  },
+  "rules": [
+    {
+      "id": 1,
+      "type": "file",
+      "from": "open",
+      "to": "closed",
+      "mode": "one-way",
+      "description": "Автоматический обмен между хранилищами",
+      "justification": "Один набор проверок на каждой стороне и общая видимость принятых файлов — одно правило. Автоматический забор (PULL) нужен с обеих сторон, а в одном правиле PULL может быть только на одном Узле — нужны два правила, по одному на направление. Способы и протоколы на двух сторонах выбираются независимо и на число правил не влияют.",
+      "senders": [
+        "Хранилище офиса"
+      ],
+      "receivers": [
+        "Хранилище цеха"
+      ],
+      "unknowns": [],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.2. Правила передачи файлов"
+        }
+      ],
+      "protocol": {
+        "open": "SFTP, автоматически по расписанию (PULL)",
+        "closed": "SFTP, автоматически при поступлении (PUSH)"
+      },
+      "checks": [],
+      "methods": {
+        "open": [
+          "SFTP, автоматически по расписанию (PULL)"
+        ],
+        "closed": [
+          "SFTP, автоматически при поступлении (PUSH)"
+        ]
+      },
+      "pull": true,
+      "usb": false
+    },
+    {
+      "id": 2,
+      "type": "file",
+      "from": "closed",
+      "to": "open",
+      "mode": "one-way",
+      "description": "Автоматический обмен между хранилищами",
+      "justification": "Один набор проверок на каждой стороне и общая видимость принятых файлов — одно правило. Автоматический забор (PULL) нужен с обеих сторон, а в одном правиле PULL может быть только на одном Узле — нужны два правила, по одному на направление. Способы и протоколы на двух сторонах выбираются независимо и на число правил не влияют.",
+      "senders": [
+        "Хранилище цеха"
+      ],
+      "receivers": [
+        "Хранилище офиса"
+      ],
+      "unknowns": [],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.2. Правила передачи файлов"
+        }
+      ],
+      "protocol": {
+        "closed": "SFTP, автоматически по расписанию (PULL)",
+        "open": "SFTP, автоматически при поступлении (PUSH)"
+      },
+      "checks": [],
+      "methods": {
+        "closed": [
+          "SFTP, автоматически по расписанию (PULL)"
+        ],
+        "open": [
+          "SFTP, автоматически при поступлении (PUSH)"
+        ]
+      },
+      "pull": true,
+      "usb": false
+    }
+  ],
+  "rules_count": 2,
+  "file_users_count": 2,
+  "file_users_range": null,
+  "file_users_breakdown": [
+    "Технические пользователи для автоматического забора (PULL): 2 (по одному на правило с PULL)",
+    "Автоматическая доставка (PUSH) пользователя не требует."
+  ],
+  "requests_for_vendor": [],
+  "requests_for_vendor_details": [],
+  "unknowns": [],
+  "assumptions": [],
+  "devices": [
+    {
+      "id": "st-office",
+      "network_id": "open",
+      "name": "Хранилище офиса"
+    },
+    {
+      "id": "st-shop",
+      "network_id": "closed",
+      "name": "Хранилище цеха"
+    }
+  ],
+  "issues": [],
+  "sources": [
+    {
+      "file": "02_methodology.md",
+      "section": "2. Размещение"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.1. Правила передачи данных"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.2. Правила передачи файлов"
+    },
+    {
+      "file": "01_scope_functions_synonyx_1.9.md",
+      "section": "5. Передача файлов — Как настраивается правило передачи файлов"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "7. Дополнительное задание"
+    }
+  ],
+  "usage": {
+    "status": "not_measured"
+  },
+  "timing": {
+    "turns": [],
+    "mean_turn_seconds": null
+  }
+}

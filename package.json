@@ -1,0 +1,28 @@
+{
+  "name": "synonyx-assistant",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p apps/web/tsconfig.json --noEmit",
+    "examples": "tsx scripts/examples.ts",
+    "dev": "concurrently -n server,web -c auto \"tsx watch apps/server/src/main.ts --dev\" \"npm -w @synonyx/web run dev\"",
+    "build": "npm -w @synonyx/web run build",
+    "start": "tsx apps/server/src/main.ts",
+    "kb": "tsx scripts/kb-search.ts",
+    "eval": "tsx scripts/eval.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@xmldom/xmldom": "^0.8.10",
+    "concurrently": "^9.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}

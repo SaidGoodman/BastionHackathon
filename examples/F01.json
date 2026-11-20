@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.1",
+  "session_id": "example-F01",
+  "status": "completed",
+  "networks": [
+    {
+      "id": "open",
+      "name": "Офисная сеть",
+      "trust": "open",
+      "declared_trust": "open"
+    },
+    {
+      "id": "closed",
+      "name": "Сеть цеха",
+      "trust": "closed",
+      "declared_trust": "closed"
+    }
+  ],
+  "firewall": {
+    "side": "open",
+    "existing": null,
+    "name": null
+  },
+  "synonyx": {
+    "location": "closed",
+    "node_a_faces": "open",
+    "node_b_faces": "closed"
+  },
+  "rules": [
+    {
+      "id": 1,
+      "type": "data",
+      "from": "closed",
+      "to": "open",
+      "mode": "one-way",
+      "description": "Журналы событий трёх станков на сервер журналов",
+      "justification": "Обратная передача не нужна — однонаправленное правило (программный диод): обратно не проходит ни один пакет. Несколько отправителей шлют одному получателю на один порт по одному протоколу — это одно правило (collect на стороне отправителей).",
+      "senders": [
+        "Станки цеха"
+      ],
+      "receivers": [
+        "Сервер журналов"
+      ],
+      "unknowns": [],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.1. Правила передачи данных"
+        },
+        {
+          "file": "02_methodology.md",
+          "section": "3.3. Направление и режим правила"
+        },
+        {
+          "file": "01_scope_functions_synonyx_1.9.md",
+          "section": "4. Передача данных — Протоколы и режимы"
+        }
+      ],
+      "protocol": "UDP",
+      "port": 514,
+      "collect_side": "closed",
+      "exchange_side": "open"
+    }
+  ],
+  "rules_count": 1,
+  "file_users_count": 0,
+  "file_users_range": null,
+  "file_users_breakdown": [],
+  "requests_for_vendor": [],
+  "requests_for_vendor_details": [],
+  "unknowns": [],
+  "assumptions": [],
+  "devices": [
+    {
+      "id": "machines",
+      "network_id": "closed",
+      "name": "Станки цеха",
+      "count": 3
+    },
+    {
+      "id": "logsrv",
+      "network_id": "open",
+      "name": "Сервер журналов"
+    }
+  ],
+  "issues": [],
+  "sources": [
+    {
+      "file": "02_methodology.md",
+      "section": "2. Размещение"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.1. Правила передачи данных"
+    }
+  ],
+  "usage": {
+    "status": "not_measured"
+  },
+  "timing": {
+    "turns": [],
+    "mean_turn_seconds": null
+  }
+}

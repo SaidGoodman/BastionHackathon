@@ -1,0 +1,192 @@
+{
+  "schema_version": "1.1",
+  "session_id": "example-F02",
+  "status": "completed",
+  "networks": [
+    {
+      "id": "open",
+      "name": "Общая сеть водоканала",
+      "trust": "open",
+      "declared_trust": "open"
+    },
+    {
+      "id": "closed",
+      "name": "Сеть насосной станции",
+      "trust": "closed",
+      "declared_trust": "closed"
+    }
+  ],
+  "firewall": {
+    "side": "open",
+    "existing": null,
+    "name": null
+  },
+  "synonyx": {
+    "location": "closed",
+    "node_a_faces": "open",
+    "node_b_faces": "closed"
+  },
+  "rules": [
+    {
+      "id": 1,
+      "type": "data",
+      "from": "open",
+      "to": "closed",
+      "mode": "two-way",
+      "description": "Опрос контроллера насосов программой диспетчера",
+      "justification": "Для Modbus TCP однонаправленного режима нет — правило всегда двунаправленное; запрос и ответ идут в одном правиле.",
+      "senders": [
+        "Программа диспетчера"
+      ],
+      "receivers": [
+        "Контроллер насосов"
+      ],
+      "unknowns": [],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.1. Правила передачи данных"
+        },
+        {
+          "file": "01_scope_functions_synonyx_1.9.md",
+          "section": "4. Передача данных — Протоколы и режимы"
+        }
+      ],
+      "protocol": "Modbus TCP",
+      "port": 502,
+      "collect_side": "open",
+      "exchange_side": "closed"
+    },
+    {
+      "id": 2,
+      "type": "data",
+      "from": "closed",
+      "to": "open",
+      "mode": "one-way",
+      "description": "Журналы событий на сервер мониторинга",
+      "justification": "Обратная передача не нужна — однонаправленное правило (программный диод): обратно не проходит ни один пакет.",
+      "senders": [
+        "Компьютер оператора"
+      ],
+      "receivers": [
+        "Сервер мониторинга"
+      ],
+      "unknowns": [],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.1. Правила передачи данных"
+        },
+        {
+          "file": "02_methodology.md",
+          "section": "3.3. Направление и режим правила"
+        },
+        {
+          "file": "01_scope_functions_synonyx_1.9.md",
+          "section": "4. Передача данных — Протоколы и режимы"
+        }
+      ],
+      "protocol": "UDP",
+      "port": 514,
+      "collect_side": "closed",
+      "exchange_side": "open"
+    },
+    {
+      "id": 3,
+      "type": "data",
+      "from": "open",
+      "to": "closed",
+      "mode": "one-way",
+      "description": "Синхронизация времени",
+      "justification": "Синхронизация времени по методике — одно однонаправленное правило от источника времени к защищаемой сети; число синхронизируемых устройств на расчёт не влияет.",
+      "senders": [
+        "Сервер времени"
+      ],
+      "receivers": [
+        "Сервер времени станции"
+      ],
+      "unknowns": [],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.1. Правила передачи данных"
+        },
+        {
+          "file": "02_methodology.md",
+          "section": "3.3. Направление и режим правила"
+        }
+      ],
+      "protocol": "UDP",
+      "port": 123,
+      "time_sync": true,
+      "collect_side": "open",
+      "exchange_side": "closed"
+    }
+  ],
+  "rules_count": 3,
+  "file_users_count": 0,
+  "file_users_range": null,
+  "file_users_breakdown": [],
+  "requests_for_vendor": [],
+  "requests_for_vendor_details": [],
+  "unknowns": [],
+  "assumptions": [],
+  "devices": [
+    {
+      "id": "dispatcher",
+      "network_id": "open",
+      "name": "Программа диспетчера"
+    },
+    {
+      "id": "monitoring",
+      "network_id": "open",
+      "name": "Сервер мониторинга"
+    },
+    {
+      "id": "ntp-office",
+      "network_id": "open",
+      "name": "Сервер времени"
+    },
+    {
+      "id": "controller",
+      "network_id": "closed",
+      "name": "Контроллер насосов"
+    },
+    {
+      "id": "operator",
+      "network_id": "closed",
+      "name": "Компьютер оператора"
+    },
+    {
+      "id": "ntp-station",
+      "network_id": "closed",
+      "name": "Сервер времени станции"
+    }
+  ],
+  "issues": [],
+  "sources": [
+    {
+      "file": "02_methodology.md",
+      "section": "2. Размещение"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.1. Правила передачи данных"
+    },
+    {
+      "file": "01_scope_functions_synonyx_1.9.md",
+      "section": "4. Передача данных — Протоколы и режимы"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.3. Направление и режим правила"
+    }
+  ],
+  "usage": {
+    "status": "not_measured"
+  },
+  "timing": {
+    "turns": [],
+    "mean_turn_seconds": null
+  }
+}

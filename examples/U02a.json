@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.1",
+  "session_id": "example-U02a",
+  "status": "needs_clarification",
+  "networks": [
+    {
+      "id": "open",
+      "name": "Офисная сеть",
+      "trust": "open",
+      "declared_trust": "open"
+    },
+    {
+      "id": "closed",
+      "name": "Сеть цеха",
+      "trust": "closed",
+      "declared_trust": "closed"
+    }
+  ],
+  "firewall": {
+    "side": "open",
+    "existing": null,
+    "name": null
+  },
+  "synonyx": {
+    "location": "closed",
+    "node_a_faces": "open",
+    "node_b_faces": "closed"
+  },
+  "rules": [
+    {
+      "id": 1,
+      "type": "file",
+      "from": "open",
+      "to": "closed",
+      "mode": "one-way",
+      "description": "Файлы двух отделов офиса в закрытый сегмент (группа 1 из 2)",
+      "justification": "Правила разделены: 2 группы пользователей не должны видеть принятые файлы друг друга — у одного правила один профиль проверок и общая видимость принятых файлов. Антивирус, песочница и DLP — внешние системы, подключаемые по ICAP; встроенного антивируса в «Синониксе» нет.",
+      "senders": [],
+      "receivers": [],
+      "unknowns": [],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.2. Правила передачи файлов"
+        },
+        {
+          "file": "01_scope_functions_synonyx_1.9.md",
+          "section": "5. Передача файлов — Проверки файлов"
+        }
+      ],
+      "protocol": {
+        "open": "SFTP, вручную",
+        "closed": "SFTP, вручную"
+      },
+      "checks": [
+        "ICAP: внешний антивирус"
+      ],
+      "methods": {
+        "open": [
+          "SFTP, вручную"
+        ],
+        "closed": [
+          "SFTP, вручную"
+        ]
+      },
+      "pull": false,
+      "usb": false
+    },
+    {
+      "id": 2,
+      "type": "file",
+      "from": "open",
+      "to": "closed",
+      "mode": "one-way",
+      "description": "Файлы двух отделов офиса в закрытый сегмент (группа 2 из 2)",
+      "justification": "Правила разделены: 2 группы пользователей не должны видеть принятые файлы друг друга — у одного правила один профиль проверок и общая видимость принятых файлов. Антивирус, песочница и DLP — внешние системы, подключаемые по ICAP; встроенного антивируса в «Синониксе» нет.",
+      "senders": [],
+      "receivers": [],
+      "unknowns": [],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.2. Правила передачи файлов"
+        },
+        {
+          "file": "01_scope_functions_synonyx_1.9.md",
+          "section": "5. Передача файлов — Проверки файлов"
+        }
+      ],
+      "protocol": {
+        "open": "SFTP, вручную",
+        "closed": "SFTP, вручную"
+      },
+      "checks": [
+        "ICAP: внешний антивирус"
+      ],
+      "methods": {
+        "open": [
+          "SFTP, вручную"
+        ],
+        "closed": [
+          "SFTP, вручную"
+        ]
+      },
+      "pull": false,
+      "usb": false
+    }
+  ],
+  "rules_count": 2,
+  "file_users_count": null,
+  "file_users_range": null,
+  "file_users_breakdown": [
+    "«Файлы двух отделов офиса в закрытый сегмент»: число людей неизвестно"
+  ],
+  "requests_for_vendor": [],
+  "requests_for_vendor_details": [],
+  "unknowns": [],
+  "assumptions": [],
+  "devices": [],
+  "issues": [],
+  "sources": [
+    {
+      "file": "02_methodology.md",
+      "section": "2. Размещение"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.1. Правила передачи данных"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.2. Правила передачи файлов"
+    },
+    {
+      "file": "01_scope_functions_synonyx_1.9.md",
+      "section": "5. Передача файлов — Как настраивается правило передачи файлов"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "7. Дополнительное задание"
+    }
+  ],
+  "usage": {
+    "status": "not_measured"
+  },
+  "timing": {
+    "turns": [],
+    "mean_turn_seconds": null
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "note": "Кандидаты для npm run eval. Тарифы — снимок каталога OpenRouter 2026-11-20 (USD за 1 млн токенов, у закреплённого провайдера). Ключи — в .env под именем key_env.",
+  "candidates": [
+    {
+      "label": "deepseek-v4-flash",
+      "id": "deepseek/deepseek-v4-flash",
+      "card": "https://openrouter.ai/deepseek/deepseek-v4-flash",
+      "provider": "deepinfra/fp8",
+      "input_per_m": 0.09,
+      "output_per_m": 0.18,
+      "api": { "base_url": "https://openrouter.ai/api/v1", "key_env": "OPENROUTER_API_KEY" }
+    },
+    {
+      "label": "glm-5.3-flash",
+      "id": "z-ai/glm-5.3-flash",
+      "card": "https://openrouter.ai/z-ai/glm-5.3-flash",
+      "provider": "gmicloud/fp8",
+      "input_per_m": 0.075,
+      "output_per_m": 0.25,
+      "api": { "base_url": "https://openrouter.ai/api/v1", "key_env": "OPENROUTER_API_KEY" }
+    },
+    {
+      "label": "claude-haiku-5.5",
+      "id": "anthropic/claude-haiku-5.5",
+      "card": "https://openrouter.ai/anthropic/claude-haiku-5.5",
+      "provider": null,
+      "input_per_m": 0.1,
+      "output_per_m": 0.5,
+      "api": { "base_url": "https://openrouter.ai/api/v1", "key_env": "OPENROUTER_API_KEY" }
+    }
+  ]
+}

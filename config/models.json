@@ -1,0 +1,27 @@
+{
+  "snapshot": {
+    "taken_at": null,
+    "source": "https://openrouter.ai/models",
+    "note": "Заполнить после выбора модели: точный id, ссылка на карточку, тарифы USD за 1 млн токенов на момент снимка. Организаторы сверяют по своему снимку."
+  },
+  "max_input_price_per_m": 0.1,
+  "models": {
+    "extract": {
+      "id": null,
+      "provider": null,
+      "card": null,
+      "purpose": "Извлечение сетей, систем и потоков из свободного текста; разбор правок; ответы о текущей схеме",
+      "input_per_m": null,
+      "output_per_m": null
+    },
+    "answer": {
+      "id": null,
+      "provider": null,
+      "card": null,
+      "purpose": "Ответы на вопросы о продукте по найденным фрагментам базы знаний",
+      "input_per_m": null,
+      "output_per_m": null
+    }
+  },
+  "fallbacks": []
+}

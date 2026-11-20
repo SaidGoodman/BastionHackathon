@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.1",
+  "session_id": "example-F04",
+  "status": "completed",
+  "networks": [
+    {
+      "id": "open",
+      "name": "Офисная сеть",
+      "trust": "open",
+      "declared_trust": "open"
+    },
+    {
+      "id": "closed",
+      "name": "Сеть цеха",
+      "trust": "closed",
+      "declared_trust": "closed"
+    }
+  ],
+  "firewall": {
+    "side": "open",
+    "existing": null,
+    "name": null
+  },
+  "synonyx": {
+    "location": "closed",
+    "node_a_faces": "open",
+    "node_b_faces": "closed"
+  },
+  "rules": [
+    {
+      "id": 1,
+      "type": "file",
+      "from": "open",
+      "to": "closed",
+      "mode": "one-way",
+      "description": "Файлы программ для станка",
+      "justification": "Один набор проверок на каждой стороне и общая видимость принятых файлов — одно правило. Способы и протоколы на двух сторонах выбираются независимо и на число правил не влияют. Антивирус, песочница и DLP — внешние системы, подключаемые по ICAP; встроенного антивируса в «Синониксе» нет.",
+      "senders": [
+        "АРМ инженера"
+      ],
+      "receivers": [
+        "Файловый сервер цеха"
+      ],
+      "unknowns": [],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.2. Правила передачи файлов"
+        },
+        {
+          "file": "01_scope_functions_synonyx_1.9.md",
+          "section": "5. Передача файлов — Проверки файлов"
+        }
+      ],
+      "protocol": {
+        "open": "SFTP, вручную",
+        "closed": "SMB, автоматически при поступлении (PUSH)"
+      },
+      "checks": [
+        "маска имени",
+        "размер",
+        "ICAP: внешний антивирус"
+      ],
+      "methods": {
+        "open": [
+          "SFTP, вручную"
+        ],
+        "closed": [
+          "SMB, автоматически при поступлении (PUSH)"
+        ]
+      },
+      "pull": false,
+      "usb": false
+    }
+  ],
+  "rules_count": 1,
+  "file_users_count": 1,
+  "file_users_range": null,
+  "file_users_breakdown": [
+    "«Файлы программ для станка»: 1 чел. (инженер)",
+    "Автоматическая доставка (PUSH) пользователя не требует."
+  ],
+  "requests_for_vendor": [],
+  "requests_for_vendor_details": [],
+  "unknowns": [],
+  "assumptions": [],
+  "devices": [
+    {
+      "id": "engineer",
+      "network_id": "open",
+      "name": "АРМ инженера"
+    },
+    {
+      "id": "fileserver",
+      "network_id": "closed",
+      "name": "Файловый сервер цеха"
+    }
+  ],
+  "issues": [],
+  "sources": [
+    {
+      "file": "02_methodology.md",
+      "section": "2. Размещение"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.1. Правила передачи данных"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.2. Правила передачи файлов"
+    },
+    {
+      "file": "01_scope_functions_synonyx_1.9.md",
+      "section": "5. Передача файлов — Как настраивается правило передачи файлов"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "7. Дополнительное задание"
+    }
+  ],
+  "usage": {
+    "status": "not_measured"
+  },
+  "timing": {
+    "turns": [],
+    "mean_turn_seconds": null
+  }
+}

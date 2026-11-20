@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.1",
+  "session_id": "example-U02b",
+  "status": "completed",
+  "networks": [
+    {
+      "id": "open",
+      "name": "Офисная сеть",
+      "trust": "open",
+      "declared_trust": "open"
+    },
+    {
+      "id": "closed",
+      "name": "Сеть цеха",
+      "trust": "closed",
+      "declared_trust": "closed"
+    }
+  ],
+  "firewall": {
+    "side": "open",
+    "existing": null,
+    "name": null
+  },
+  "synonyx": {
+    "location": "closed",
+    "node_a_faces": "open",
+    "node_b_faces": "closed"
+  },
+  "rules": [
+    {
+      "id": 1,
+      "type": "file",
+      "from": "open",
+      "to": "closed",
+      "mode": "one-way",
+      "description": "Файлы группы в закрытый сегмент",
+      "justification": "Один набор проверок на каждой стороне и общая видимость принятых файлов — одно правило. Проверки на отправляющем и принимающем Узлах различаются — второе правило для этого не нужно. Антивирус, песочница и DLP — внешние системы, подключаемые по ICAP; встроенного антивируса в «Синониксе» нет.",
+      "senders": [],
+      "receivers": [],
+      "unknowns": [],
+      "sources": [
+        {
+          "file": "02_methodology.md",
+          "section": "3.2. Правила передачи файлов"
+        },
+        {
+          "file": "01_scope_functions_synonyx_1.9.md",
+          "section": "5. Передача файлов — Проверки файлов"
+        }
+      ],
+      "protocol": {
+        "open": "SFTP, вручную",
+        "closed": "SFTP, вручную"
+      },
+      "checks": [
+        "размер",
+        "ICAP: внешний антивирус"
+      ],
+      "checks_by_node": {
+        "open": [
+          "размер"
+        ],
+        "closed": [
+          "ICAP: внешний антивирус"
+        ]
+      },
+      "methods": {
+        "open": [
+          "SFTP, вручную"
+        ],
+        "closed": [
+          "SFTP, вручную"
+        ]
+      },
+      "pull": false,
+      "usb": false
+    }
+  ],
+  "rules_count": 1,
+  "file_users_count": null,
+  "file_users_range": {
+    "min": 2,
+    "max": 10
+  },
+  "file_users_breakdown": [
+    "«Файлы группы в закрытый сегмент»: от 2 до 10 чел."
+  ],
+  "requests_for_vendor": [],
+  "requests_for_vendor_details": [],
+  "unknowns": [],
+  "assumptions": [],
+  "devices": [],
+  "issues": [],
+  "sources": [
+    {
+      "file": "02_methodology.md",
+      "section": "2. Размещение"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.1. Правила передачи данных"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "3.2. Правила передачи файлов"
+    },
+    {
+      "file": "01_scope_functions_synonyx_1.9.md",
+      "section": "5. Передача файлов — Как настраивается правило передачи файлов"
+    },
+    {
+      "file": "02_methodology.md",
+      "section": "7. Дополнительное задание"
+    }
+  ],
+  "usage": {
+    "status": "not_measured"
+  },
+  "timing": {
+    "turns": [],
+    "mean_turn_seconds": null
+  }
+}

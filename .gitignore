@@ -1,0 +1,13 @@
+node_modules/
+dist/
+logs/
+data/
+
+# Ключи и переменные окружения — только локально
+.env
+.env.*
+!.env.example
+*.local
+
+# Отчёты прогонов моделей (npm run eval)
+examples/eval-*.json
