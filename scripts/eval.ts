@@ -84,6 +84,7 @@ interface StepReport {
   calls: CallLog[];
   intent?: string;
   reply?: string;
+  ops?: Op[];
   error?: string;
 }
 
@@ -135,8 +136,12 @@ async function runStep(c: Candidate, sc: EvalScenario, run: number): Promise<Ste
     check(res.rulesCount === exp.rulesCount, `правил ${res.rulesCount}, ожидалось ${exp.rulesCount}`, 2);
     const r = diff(ruleSigs(exp), ruleSigs(res));
     check(!r.missing.length && !r.extra.length, `правила: нет [${r.missing.join(' | ')}], лишние [${r.extra.join(' | ')}]`, 3);
-    check(res.status === exp.status, `статус ${res.status}, ожидался ${exp.status}`);
     const q = diff(questionKinds(exp), questionKinds(res));
+    // Вопросы, на которые в тексте нет ответа, допустимы — тогда допустим и статус «нужны уточнения».
+    const allowed = q.extra.filter((k) => sc.allow?.includes(k));
+    q.extra = q.extra.filter((k) => !sc.allow?.includes(k));
+    const statusOk = res.status === exp.status || (allowed.length > 0 && !q.extra.length && res.status === 'needs_clarification');
+    check(statusOk, `статус ${res.status}, ожидался ${exp.status}`);
     // Не задан ожидаемый вопрос = модель подставила значение без основания (самая дорогая ошибка).
     check(!q.missing.length, `подставлено без основания (нет вопросов): ${q.missing.join(', ')}`, 2);
     check(!q.extra.length, `упущены сведения (лишние вопросы): ${q.extra.join(', ')}`);
@@ -148,7 +153,7 @@ async function runStep(c: Candidate, sc: EvalScenario, run: number): Promise<Ste
     check(!!out.sources?.length, 'нет источников');
     if (sc.product.vendorRequest) check(state.requestsForVendor.length > 0, 'не сохранено пожелание для разработчика');
   }
-  return { scenario: sc.name, run, ok: score === max, score, max, notes, ms, calls, intent: out.intent, reply: out.reply };
+  return { scenario: sc.name, run, ok: score === max, score, max, notes, ms, calls, intent: out.intent, reply: out.reply, ops: out.ops };
 }
 
 // ------------------------------------------------------------------ прогон

@@ -47,6 +47,7 @@ export class OpenRouterClient {
     private baseUrl = OPENROUTER_URL,
   ) {}
 
+  /** Сам OpenRouter: поддерживает закрепление провайдера, usage.cost и объект reasoning. */
   private get isOpenRouter() {
     return this.baseUrl.startsWith(OPENROUTER_URL);
   }
@@ -68,6 +69,10 @@ export class OpenRouterClient {
       // Рассуждение извлечению не нужно: оно добавляет время и выходные токены.
       if (req.reasoning === 'off') body.reasoning = { enabled: false };
       else if (req.reasoning) body.reasoning = { effort: req.reasoning };
+    } else if (req.reasoning) {
+      // Посредники (ProxyAPI …/openrouter/v1) не передают provider и объект reasoning,
+      // но понимают reasoning_effort: у DeepSeek V4.1 Flash «none» выключает рассуждение полностью.
+      body.reasoning_effort = req.reasoning === 'off' ? 'none' : req.reasoning;
     }
 
     const base: Omit<CallLog, 'finished_at' | 'status' | 'input_tokens' | 'output_tokens' | 'cached_tokens' | 'reasoning_tokens' | 'cost_input_usd' | 'cost_output_usd' | 'cost_total_usd' | 'actual_cost_usd' | 'usage_source' | 'provider_response_id' | 'raw_usage'> = {
@@ -75,7 +80,8 @@ export class OpenRouterClient {
       turn_id: req.turnId,
       call_id: callId,
       model_id: req.model,
-      provider: req.provider ?? null,
+      // Провайдер в журнале — только если он действительно закреплён (у посредников закрепления нет).
+      provider: this.isOpenRouter ? (req.provider ?? null) : null,
       purpose: req.purpose,
       started_at: started.toISOString(),
       prices: req.prices,
@@ -112,7 +118,7 @@ export class OpenRouterClient {
         usage_source: usage ? 'provider_response' : 'unknown',
         provider_response_id: json?.id ?? null,
         raw_usage: usage,
-        provider: json?.provider ?? req.provider ?? null,
+        provider: json?.provider ?? base.provider,
         ...(res.ok && !json?.error ? {} : { error: String(json?.error?.message ?? res.status) }),
       };
       this.sink(log);

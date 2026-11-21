@@ -1,24 +1,26 @@
 {
   "snapshot": {
-    "taken_at": null,
-    "source": "https://openrouter.ai/models",
-    "note": "Заполнить после выбора модели: точный id, ссылка на карточку, тарифы USD за 1 млн токенов на момент снимка. Организаторы сверяют по своему снимку."
+    "taken_at": "2026-11-21T08:30:00Z",
+    "source": "https://openrouter.ai/api/v1/models",
+    "note": "Тарифы — опубликованная цена карточки модели в каталоге OpenRouter, USD за 1 млн токенов. Вызовы идут через ProxyAPI (api.proxyapi.ru/openrouter/v1): он не передаёт закрепление провайдера, поэтому провайдер не фиксируется, а оценочная стоимость считается по цене карточки (ТЗ §7). Фактическая цена ProxyAPI в рублях в оценку не входит."
   },
   "max_input_price_per_m": 0.1,
   "models": {
     "extract": {
-      "id": null,
+      "id": "deepseek/deepseek-v4.1-flash",
       "provider": null,
-      "card": null,
-      "purpose": "Извлечение сетей, систем и потоков из свободного текста; разбор правок; ответы о текущей схеме",
-      "input_per_m": null,
-      "output_per_m": null
+      "card": "https://openrouter.ai/deepseek/deepseek-v4.1-flash",
+      "purpose": "Извлечение сетей, систем и потоков из свободного текста; разбор правок; ответы о текущей схеме и о продукте по найденным фрагментам базы знаний (один вызов на шаг)",
+      "input_per_m": 0.05,
+      "output_per_m": 0.199,
+      "api": { "base_url": "https://api.proxyapi.ru/openrouter/v1", "key_env": "PROXYAPI_KEY_DEEPSEEK" },
+      "reasoning": "off"
     },
     "answer": {
       "id": null,
       "provider": null,
       "card": null,
-      "purpose": "Ответы на вопросы о продукте по найденным фрагментам базы знаний",
+      "purpose": "Отдельная модель для ответов о продукте не используется: ответ даёт модель извлечения в том же вызове",
       "input_per_m": null,
       "output_per_m": null
     }

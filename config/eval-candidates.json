@@ -1,6 +1,18 @@
 {
-  "note": "Кандидаты для npm run eval. Тарифы — снимок каталога OpenRouter 2026-11-20 (USD за 1 млн токенов, у закреплённого провайдера). Ключи — в .env под именем key_env.",
+  "note": "Кандидаты для npm run eval. Тарифы — снимок каталога OpenRouter 2026-11-21 (USD за 1 млн токенов, у закреплённого провайдера); по ним считается оценочная стоимость. Запросы идут через ProxyAPI в OpenRouter. Ключи — в .env под именем key_env.",
   "candidates": [
+    {
+      "label": "deepseek-v4.1-flash",
+      "id": "deepseek/deepseek-v4.1-flash",
+      "card": "https://openrouter.ai/deepseek/deepseek-v4.1-flash",
+      "provider": "baidu/fp8",
+      "input_per_m": 0.05,
+      "output_per_m": 0.199,
+      "api": {
+        "base_url": "https://api.proxyapi.ru/openrouter/v1",
+        "key_env": "PROXYAPI_KEY_DEEPSEEK"
+      }
+    },
     {
       "label": "deepseek-v4-flash",
       "id": "deepseek/deepseek-v4-flash",
@@ -8,7 +20,10 @@
       "provider": "deepinfra/fp8",
       "input_per_m": 0.09,
       "output_per_m": 0.18,
-      "api": { "base_url": "https://openrouter.ai/api/v1", "key_env": "OPENROUTER_API_KEY" }
+      "api": {
+        "base_url": "https://api.proxyapi.ru/openrouter/v1",
+        "key_env": "PROXYAPI_KEY_DEEPSEEK"
+      }
     },
     {
       "label": "glm-5.3-flash",
@@ -17,7 +32,10 @@
       "provider": "gmicloud/fp8",
       "input_per_m": 0.075,
       "output_per_m": 0.25,
-      "api": { "base_url": "https://openrouter.ai/api/v1", "key_env": "OPENROUTER_API_KEY" }
+      "api": {
+        "base_url": "https://api.proxyapi.ru/openrouter/v1",
+        "key_env": "PROXYAPI_KEY_GLM"
+      }
     },
     {
       "label": "claude-haiku-5.5",
@@ -26,7 +44,10 @@
       "provider": null,
       "input_per_m": 0.1,
       "output_per_m": 0.5,
-      "api": { "base_url": "https://openrouter.ai/api/v1", "key_env": "OPENROUTER_API_KEY" }
+      "api": {
+        "base_url": "https://api.proxyapi.ru/openrouter/v1",
+        "key_env": "PROXYAPI_KEY_DEEPSEEK"
+      }
     }
   ]
 }
