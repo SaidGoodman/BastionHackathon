@@ -18,6 +18,8 @@ export interface ChatTurn {
   sources?: SourceRef[];
   /** Снимок схемы, приложенный к ответу. */
   diagramXml?: string;
+  /** Не показывать карточки уточнений после отказа или справочного ответа. */
+  suppressQuestions?: boolean;
 }
 
 export interface TurnTiming {
@@ -46,6 +48,7 @@ export interface SessionView {
   usage: UsageSummary;
   timing: { turns: TurnTiming[]; mean_seconds: number | null };
   llm: { configured: boolean; models: string[] };
+  canUndo: boolean;
 }
 
 export interface MessageRequest {

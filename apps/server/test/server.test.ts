@@ -110,6 +110,31 @@ describe('цикл сессии', () => {
     expect(view.usage.calls).toBe(1);
   });
 
+  it('сохраняет неизвестные протокол и обратную передачу и возвращает предварительный результат', async () => {
+    const ops = fixtures.F02.map((op) => op.op === 'upsert_data_flow' && op.id === 'f1'
+      ? { ...op, protocol: null, reverse: null } : op);
+    const { app } = setup(() => ({ intent: 'describe', ops }));
+    const s = (await post(app, '/api/sessions')).json;
+    const initial = await post(app, `/api/sessions/${s.id}/messages`, { text: 'описание' });
+    const questions = initial.json.pendingQuestions;
+    const protocol = questions.find((q: any) => q.id.endsWith(':protocol'));
+    const reverse = questions.find((q: any) => q.id.endsWith(':reverse'));
+    expect(protocol).toBeDefined();
+    expect(reverse).toBeDefined();
+    const answer = await post(app, `/api/sessions/${s.id}/answers`, {
+      answers: [{ questionId: protocol.id, value: 'unknown' }, { questionId: reverse.id, value: 'unknown' }],
+    });
+    expect(answer.status).toBe(200);
+    const flow = answer.json.state.flows.find((f: any) => `flow:${f.id}:protocol` === protocol.id);
+    expect(flow.protocol).toBe('unknown');
+    expect(flow.reverse).toBe('unknown');
+    expect(answer.json.result.status).toBe('preliminary');
+    expect(answer.json.result.unknowns.map((u: any) => u.path)).toEqual(expect.arrayContaining([protocol.id, reverse.id]));
+    expect(answer.json.pendingQuestions.map((q: any) => q.id)).not.toContain(protocol.id);
+    expect(answer.json.pendingQuestions.map((q: any) => q.id)).not.toContain(reverse.id);
+    await app.close();
+  });
+
   it('«другое» сохраняется в пожелания для разработчика', async () => {
     const { app } = setup(() => ({ intent: 'describe', ops: fixtures.N01 }));
     const s = (await post(app, '/api/sessions')).json;
@@ -170,6 +195,44 @@ describe('цикл сессии', () => {
     fail = false;
     const ok = await post(app, `/api/sessions/${s.id}/messages`, { text: 'F01' });
     expect(ok.json.result.rulesCount).toBe(1);
+  });
+
+  it('некорректные операции модели отклоняются до изменения состояния', async () => {
+    const { app } = setup(() => ({
+      intent: 'describe',
+      ops: [{ op: 'upsert_data_flow', id: 'f1', protocol: 'HTTP', senders: ['нет-такого-устройства'] } as Op],
+    }));
+    const s = (await post(app, '/api/sessions')).json;
+    const bad = await post(app, `/api/sessions/${s.id}/messages`, { text: 'создай поток' });
+    expect(bad.status).toBe(502);
+    expect(bad.json.error).toContain('Ответ модели отклонён');
+    const after = (await app.inject({ method: 'GET', url: `/api/sessions/${s.id}` })).json();
+    expect(after.state.networks).toHaveLength(0);
+    expect(after.state.devices).toHaveLength(0);
+    expect(after.state.flows).toHaveLength(0);
+    expect(after.history).toHaveLength(0);
+  });
+
+  it('применяет правку сразу и восстанавливает предыдущий проект по откату', async () => {
+    let n = 0;
+    const { app } = setup(() => n++ === 0
+      ? { intent: 'describe', ops: fixtures.F01 }
+      : { intent: 'modify', ops: [{ op: 'set_network', id: 'n1', name: 'Новое название' }] });
+    const s = (await post(app, '/api/sessions')).json;
+    const initial = (await post(app, `/api/sessions/${s.id}/messages`, { text: 'описание' })).json;
+    const changed = (await post(app, `/api/sessions/${s.id}/messages`, { text: 'переименуй сеть' })).json;
+    expect(changed.state.networks.find((x: any) => x.id === 'n1').name).toBe('Новое название');
+    expect(changed.canUndo).toBe(true);
+    expect((await post(app, `/api/sessions/${s.id}/undo`, { expectedVersion: initial.version })).status).toBe(409);
+    const restored = await post(app, `/api/sessions/${s.id}/undo`, { expectedVersion: changed.version });
+    expect(restored.status).toBe(200);
+    expect(restored.json.state).toEqual(initial.state);
+    expect(restored.json.result.rules).toEqual(initial.result.rules);
+    expect(restored.json.drawio).toBe(initial.drawio);
+    expect(restored.json.version).toBe(changed.version + 1);
+    expect(restored.json.canUndo).toBe(false);
+    expect((await post(app, `/api/sessions/${s.id}/undo`, { expectedVersion: restored.json.version })).status).toBe(409);
+    await app.close();
   });
 
   it('dev-сценарии доступны только в режиме разработки', async () => {

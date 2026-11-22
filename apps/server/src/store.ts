@@ -13,6 +13,7 @@ export interface SessionRecord {
   history: ChatTurn[];
   calls: CallLog[];
   timings: TurnTiming[];
+  previousState?: { state: SessionState; lastGood: SessionState | null };
 }
 
 export class Store {

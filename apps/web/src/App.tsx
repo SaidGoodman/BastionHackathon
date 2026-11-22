@@ -66,6 +66,19 @@ export function App() {
     void api.timing(sessionId, p.turnId, performance.now() - p.t0);
   };
 
+  const undo = async () => {
+    if (!view) return;
+    setBusy(true);
+    setError(null);
+    try {
+      setView(await api.undo(view.id, view.version));
+    } catch (e: any) {
+      setError({ message: e.message, retry: () => void undo() });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (!view) return <div className="boot">Загрузка…</div>;
 
   const diagramXml = editedDiagram && editedDiagram.id === view.id && editedDiagram.version === view.version && editedDiagram.source === view.drawio ? editedDiagram.xml : view.drawio;
@@ -90,6 +103,7 @@ export function App() {
           </div>
         </div>
         <div className="actions">
+          <button className="btn" onClick={undo} disabled={busy || !view.canUndo}>Откатить последнюю правку</button>
           <button className="btn" onClick={downloadDiagram}>
             Скачать .drawio
           </button>

@@ -43,6 +43,7 @@ export const api = {
   message: (id: string, text: string) => req<StepResponse>('POST', `/api/sessions/${id}/messages`, { text }),
   answers: (id: string, answers: { questionId: string; value: AnswerValue }[]) =>
     req<StepResponse>('POST', `/api/sessions/${id}/answers`, { answers }),
+  undo: (id: string, expectedVersion: number) => req<SessionView>('POST', `/api/sessions/${id}/undo`, { expectedVersion }),
   timing: (id: string, turnId: string, clientMs: number) =>
     req<{ ok: true }>('POST', `/api/sessions/${id}/timing`, { turnId, clientMs }).catch(() => undefined),
   scenario: (id: string, name: string) => req<SessionView>('POST', `/api/sessions/${id}/dev/scenario/${name}`),

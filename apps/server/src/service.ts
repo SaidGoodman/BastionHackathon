@@ -25,7 +25,7 @@ import {
 } from '@synonyx/core';
 import { toDrawio } from '@synonyx/diagram';
 import type { KbIndex } from '@synonyx/kb';
-import type { Extractor, ExtractOutput, KbSnippet } from '@synonyx/llm';
+import { validateExtractOutput, type Extractor, type ExtractOutput, type KbSnippet } from '@synonyx/llm';
 import type { SessionRecord, Store } from './store.js';
 
 export class HttpError extends Error {
@@ -96,6 +96,7 @@ export class SessionService {
       usage: summarize(rec.calls),
       timing: { turns: rec.timings, mean_seconds: mean },
       llm: { configured: this.extractor.configured, models: this.extractor.models },
+      canUndo: !!rec.previousState,
     };
   }
 
@@ -119,6 +120,7 @@ export class SessionService {
     const clean = text.trim();
     if (!clean) throw new HttpError(400, 'Пустое сообщение');
     const turnId = randomUUID();
+    const validationKb = this.snippets(clean);
     return this.step(rec, turnId, 'message', { id: randomUUID(), role: 'user', at: now(), kind: 'message', text: clean }, async () => {
       const out = await this.extractor.extract({
         sessionId: rec.id,
@@ -127,10 +129,10 @@ export class SessionService {
         result: evaluate(rec.state),
         history: rec.history,
         text: clean,
-        kb: this.snippets(clean),
+        kb: validationKb,
       });
       return out;
-    });
+    }, validationKb);
   }
 
   async answers(id: string, answers: { questionId: string; value: AnswerValue }[]): Promise<{ view: SessionView; turnId: string }> {
@@ -163,11 +165,12 @@ export class SessionService {
       }
       if (forLlm.length && this.extractor.configured) {
         const text = forLlm.join('\n');
-        const out = await this.extractor.extract({ sessionId: rec.id, turnId, state, result: evaluate(state), history: rec.history, text, kb: this.snippets(text) });
+        const kb = this.snippets(text);
+        const out = await this.extractor.extract({ sessionId: rec.id, turnId, state, result: evaluate(state), history: rec.history, text, kb });
         return { ...out, intent: CHANGING.has(out.intent) ? out.intent : 'describe', ops: [...ops, ...out.ops] };
       }
       return { intent: 'describe', ops };
-    });
+    }, []);
   }
 
   /** Режим разработки: применить готовый сценарий без модели (не используется в зачётном прогоне). */
@@ -175,8 +178,9 @@ export class SessionService {
     const rec = this.get(id);
     const ops = (fixtures as Record<string, Op[]>)[name];
     if (!ops) throw new HttpError(404, `Нет сценария ${name}`);
-    rec.state = applyOps(rec.state, ops).state;
-    rec.version++;
+    const next = applyOps(rec.state, ops).state;
+    if (JSON.stringify(stripMeta(next)) !== JSON.stringify(stripMeta(rec.state))) { this.rememberPrevious(rec); rec.version++; }
+    rec.state = next;
     const result = evaluate(rec.state);
     rec.history.push({ id: randomUUID(), role: 'user', at: now(), kind: 'message', text: `[dev] загружен сценарий ${name}` });
     rec.history.push(assistantTurn(rec.state, result, rec.version));
@@ -193,18 +197,41 @@ export class SessionService {
     this.store.save(rec);
   }
 
+  undo(id: string, expectedVersion: number): SessionView {
+    const rec = this.get(id);
+    if (rec.version !== expectedVersion) throw new HttpError(409, 'Проект изменился. Обновите страницу и повторите откат.');
+    if (!rec.previousState) throw new HttpError(409, 'Предыдущая версия недоступна.');
+    rec.state = rec.previousState.state;
+    rec.lastGood = rec.previousState.lastGood;
+    delete rec.previousState;
+    rec.version++;
+    rec.history.push(assistantTurn(rec.state, evaluate(rec.state), rec.version, 'Восстановлена предыдущая версия проекта.'));
+    this.store.save(rec);
+    return this.view(rec);
+  }
+
+  private rememberPrevious(rec: SessionRecord) {
+    rec.previousState = { state: structuredClone(rec.state), lastGood: structuredClone(rec.lastGood) };
+  }
+
   private async step(
     rec: SessionRecord,
     turnId: string,
     kind: 'message' | 'answers',
     userTurn: ChatTurn,
     run: () => Promise<ExtractOutput>,
+    validationKb: KbSnippet[] = [],
   ): Promise<{ view: SessionView; turnId: string }> {
     const t0 = Date.now();
     const startedAt = now();
     const callsBefore = rec.calls.length;
+    const baseVersion = rec.version;
     try {
       const out = await run();
+      if (rec.version !== baseVersion) throw new HttpError(409, 'Проект изменился во время обработки. Повторите запрос.');
+      // Проверяем ответ модели до любой операции над состоянием. Ошибка здесь
+      // прерывает шаг атомарно: applyOps ещё не вызывался.
+      validateExtractOutput(out, rec.state, validationKb);
       const vendorBefore = rec.state.requestsForVendor.length;
       const prevResult = evaluate(rec.state);
       let reply = out.reply;
@@ -218,7 +245,10 @@ export class SessionService {
           reply = [reply, ...blocking.map((b) => b.text), 'Изменение не применено, последнее корректное решение сохранено.'].filter(Boolean).join('\n\n');
           rec.state = { ...rec.state, requestsForVendor: next.requestsForVendor };
         } else {
-          if (JSON.stringify(stripMeta(next)) !== JSON.stringify(stripMeta(rec.state))) rec.version++;
+          if (JSON.stringify(stripMeta(next)) !== JSON.stringify(stripMeta(rec.state))) {
+            this.rememberPrevious(rec);
+            rec.version++;
+          }
           rec.state = next;
           if (!blocking.length && (nextResult.status === 'completed' || nextResult.status === 'preliminary')) rec.lastGood = next;
         }
@@ -242,6 +272,9 @@ export class SessionService {
       const diagramRequest = /(?:схем|диаграмм)/i.test(userTurn.text) && /(?:нарис|постро|отрис|покаж|показ|созда|сдела|сгенер|вывед)/i.test(userTurn.text);
       if (kind === 'message' && diagramRequest && (result.rules.length > 0 || result.status !== 'needs_clarification')) {
         assistant.diagramXml = toDrawio(rec.state, result);
+      }
+      if (!changed && (out.intent === 'off_topic' || out.intent === 'product_question' || out.intent === 'question_about_solution')) {
+        assistant.suppressQuestions = true;
       }
       rec.history.push(assistant);
       const timing: TurnTiming = {

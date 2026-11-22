@@ -60,6 +60,10 @@ export function buildApp(opts: AppOptions): { app: FastifyInstance; service: Ses
     return { ...view, turnId };
   });
 
+  app.post<{ Params: { id: string }; Body: { expectedVersion: number } }>('/api/sessions/:id/undo', async (req) =>
+    service.undo(req.params.id, req.body?.expectedVersion),
+  );
+
   app.post<{ Params: { id: string }; Body: TimingReport }>('/api/sessions/:id/timing', async (req) => {
     service.timing(req.params.id, req.body.turnId, Number(req.body.clientMs));
     return { ok: true };

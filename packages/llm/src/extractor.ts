@@ -7,6 +7,7 @@ import type { ModelsConfig } from './config.js';
 import { pricesOf } from './config.js';
 import type { OpenRouterClient } from './openrouter.js';
 import { SYSTEM_PROMPT } from './prompt.js';
+import { InvalidModelOutputError } from './validation.js';
 
 export type Intent =
   | 'describe' // новое описание задачи или дополнение
@@ -120,7 +121,7 @@ export class LlmExtractor implements Extractor {
         { role: 'user', content: user },
       ],
     });
-    return parseOutput(text, input.kb);
+    return parseOutput(text, input.kb, true);
   }
 }
 
@@ -134,14 +135,22 @@ function compactState(s: SessionState) {
   };
 }
 
-export function parseOutput(text: string, kb: KbSnippet[] = []): ExtractOutput {
+export function parseOutput(text: string, kb: KbSnippet[] = [], strictSources = false): ExtractOutput {
   const start = text.indexOf('{');
   const end = text.lastIndexOf('}');
   const json = JSON.parse(start >= 0 ? text.slice(start, end + 1) : text);
+  if (strictSources && (!json || typeof json !== 'object' || Array.isArray(json))) throw new InvalidModelOutputError('корень JSON должен быть объектом');
+  if (strictSources && typeof json.intent !== 'string') throw new InvalidModelOutputError('поле intent должно быть строкой');
+  if (strictSources && !Array.isArray(json.ops)) throw new InvalidModelOutputError('поле ops должно быть массивом');
+  if (strictSources && json.sources !== undefined && !Array.isArray(json.sources)) throw new InvalidModelOutputError('поле sources должно быть массивом');
+  if (strictSources && json.reply !== undefined && typeof json.reply !== 'string') throw new InvalidModelOutputError('поле reply должно быть строкой');
   const intent: Intent = json.intent ?? 'describe';
   const ops: Op[] = Array.isArray(json.ops) ? json.ops : [];
   // Модель называет id фрагментов; ссылку «файл § раздел» строим сами — выдуманный id отбрасывается.
   const ids: string[] = Array.isArray(json.sources) ? json.sources.filter((x: unknown) => typeof x === 'string') : [];
+  if (strictSources && Array.isArray(json.sources) && (json.sources.some((x: unknown) => typeof x !== 'string') || ids.some((id) => !kb.some((k) => k.id === id)))) {
+    throw new InvalidModelOutputError('указан неизвестный источник базы знаний');
+  }
   const sources = ids.map((id) => kb.find((k) => k.id === id)).filter((k): k is KbSnippet => !!k).map((k) => ({ file: k.file, section: k.section }));
   return { intent, ops, reply: typeof json.reply === 'string' ? json.reply : undefined, sources: sources.length ? sources : undefined };
 }

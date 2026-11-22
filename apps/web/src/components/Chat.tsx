@@ -43,7 +43,7 @@ export function Chat({ view, busy, error, config, onSend, onAnswers, onScenario 
         {view.history.map((t) => (
           <Turn key={t.id} turn={t} />
         ))}
-        {!busy && lastAssistant && projectStarted(view) && view.pendingQuestions.length > 0 && (
+        {!busy && lastAssistant && !lastAssistant.suppressQuestions && projectStarted(view) && view.pendingQuestions.length > 0 && (
           <Questions key={lastAssistant.id} questions={view.pendingQuestions} onSubmit={onAnswers} disabled={busy} />
         )}
         {busy && (
@@ -63,6 +63,7 @@ export function Chat({ view, busy, error, config, onSend, onAnswers, onScenario 
       <div className="composer">
         <textarea
           value={text}
+          disabled={busy}
           onChange={(e) => setText(e.target.value)}
           placeholder={empty ? 'Опишите две сети и что между ними нужно передавать…' : 'Уточнение, вопрос о схеме или правка…'}
           rows={3}
