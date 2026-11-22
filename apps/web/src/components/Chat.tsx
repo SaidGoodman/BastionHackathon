@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { AnswerValue, ChatTurn, SessionView } from '@synonyx/core';
-import { projectStarted, type AppConfig } from '../api';
+import { projectStarted } from '../api';
 import { Questions } from './Questions';
-import { Sources } from './Sources';
 import { loadViewer } from './DiagramView';
 
 const EXAMPLE =
@@ -13,13 +12,11 @@ interface Props {
   view: SessionView;
   busy: boolean;
   error: { message: string; retry: () => void } | null;
-  config: AppConfig | null;
   onSend: (text: string) => Promise<boolean>;
   onAnswers: (a: { questionId: string; value: AnswerValue }[]) => Promise<boolean>;
-  onScenario: (name: string) => void;
 }
 
-export function Chat({ view, busy, error, config, onSend, onAnswers, onScenario }: Props) {
+export function Chat({ view, busy, error, onSend, onAnswers }: Props) {
   const [text, setText] = useState('');
   const listRef = useRef<HTMLDivElement>(null);
   const empty = view.history.length === 0;
@@ -39,7 +36,7 @@ export function Chat({ view, busy, error, config, onSend, onAnswers, onScenario 
   return (
     <section className="chat" aria-label="Диалог">
       <div className="chat-list" ref={listRef}>
-        {empty && <StartScreen onExample={() => setText(EXAMPLE)} config={config} onScenario={onScenario} />}
+        {empty && <StartScreen />}
         {view.history.map((t) => (
           <Turn key={t.id} turn={t} />
         ))}
@@ -72,11 +69,6 @@ export function Chat({ view, busy, error, config, onSend, onAnswers, onScenario 
           }}
         />
         <div className="composer-actions">
-          {empty && (
-            <button className="btn ghost" onClick={() => setText(EXAMPLE)} disabled={busy}>
-              Подставить пример
-            </button>
-          )}
           <span className="hint">Ctrl+Enter — отправить</span>
           <button className="btn primary" onClick={send} disabled={busy || !text.trim()}>
             Отправить
@@ -87,7 +79,7 @@ export function Chat({ view, busy, error, config, onSend, onAnswers, onScenario 
   );
 }
 
-function StartScreen({ onExample, config, onScenario }: { onExample: () => void; config: AppConfig | null; onScenario: (n: string) => void }) {
+function StartScreen() {
   return (
     <div className="start">
       <h1>Где поставить «Синоникс» и сколько правил понадобится</h1>
@@ -98,26 +90,14 @@ function StartScreen({ onExample, config, onScenario }: { onExample: () => void;
       <ul>
         <li>объяснение размещения межсетевого экрана и «Синоникса»;</li>
         <li>таблицу минимального набора правил с обоснованием;</li>
-        <li>схему в стиле «АйТи Бастион» и редактируемый файл .drawio.</li>
+        <li>схему и редактируемый файл .drawio.</li>
       </ul>
       <div className="example">
         <div className="example-label">Пример описания</div>
         <p>{EXAMPLE}</p>
-        <button className="btn" onClick={onExample}>
-          Подставить в поле ввода
-        </button>
       </div>
       <p className="muted">Если чего-то не знаете — не страшно: я задам уточняющие вопросы с вариантами ответа.</p>
-      {config?.dev && config.fixtures.length > 0 && (
-        <div className="dev">
-          <span>Режим разработки — загрузить сценарий без модели:</span>
-          {config.fixtures.map((f) => (
-            <button key={f} className="chip" onClick={() => onScenario(f)}>
-              {f}
-            </button>
-          ))}
-        </div>
-      )}
+
     </div>
   );
 }
@@ -135,7 +115,6 @@ function Turn({ turn }: { turn: ChatTurn }) {
         <div className="text">{turn.text}</div>
       )}
       {turn.diagramXml && <ChatDiagram xml={turn.diagramXml} />}
-      {turn.role === 'assistant' && turn.sources && turn.sources.length > 0 && <Sources sources={turn.sources} compact />}
     </div>
   );
 }

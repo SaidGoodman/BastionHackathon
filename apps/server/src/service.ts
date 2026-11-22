@@ -235,6 +235,8 @@ export class SessionService {
       const vendorBefore = rec.state.requestsForVendor.length;
       const prevResult = evaluate(rec.state);
       let reply = out.reply;
+      let changeApplied = false;
+      let changeRejected = false;
 
       if (CHANGING.has(out.intent)) {
         const { state: next, errors } = applyOps(rec.state, out.ops);
@@ -242,12 +244,14 @@ export class SessionService {
         const blocking = nextResult.issues.filter((i) => i.severity === 'error');
         if (blocking.length && rec.lastGood && (prevResult.status === 'completed' || prevResult.status === 'preliminary')) {
           // Недопустимое изменение: последнее корректное решение сохраняется.
-          reply = [reply, ...blocking.map((b) => b.text), 'Изменение не применено, последнее корректное решение сохранено.'].filter(Boolean).join('\n\n');
+          reply = [...blocking.map((b) => b.text), 'Изменение не применено, последнее корректное решение сохранено.'].join('\n\n');
+          changeRejected = true;
           rec.state = { ...rec.state, requestsForVendor: next.requestsForVendor };
         } else {
           if (JSON.stringify(stripMeta(next)) !== JSON.stringify(stripMeta(rec.state))) {
             this.rememberPrevious(rec);
             rec.version++;
+            changeApplied = true;
           }
           rec.state = next;
           if (!blocking.length && (nextResult.status === 'completed' || nextResult.status === 'preliminary')) rec.lastGood = next;
@@ -262,11 +266,16 @@ export class SessionService {
       const newVendor = rec.state.requestsForVendor.slice(vendorBefore).map((r) => ({ ...r, turnId }));
       if (newVendor.length) this.store.addVendorRequests(rec.id, newVendor);
 
+      if (out.intent === 'modify' && !changeApplied && !changeRejected) {
+        reply = out.ops.length === 0 && reply?.includes('?')
+          ? `Изменение не применено. ${reply}`
+          : 'Изменение не применено: состояние проекта осталось прежним. Уточните, что именно нужно изменить.';
+      }
       const result = evaluate(rec.state);
       rec.history.push(userTurn);
       const changed = CHANGING.has(out.intent);
       const assistant: ChatTurn = changed
-        ? assistantTurn(rec.state, result, rec.version, reply, out.sources)
+        ? assistantTurn(rec.state, result, rec.version, reply, out.sources, changeApplied)
         : { id: randomUUID(), role: 'assistant', at: now(), kind: 'reply', text: reply ?? 'Готово.', resultVersion: rec.version, sources: out.sources };
       // При явной просьбе показать схему сохраняем снимок именно этого ответа в истории.
       const diagramRequest = /(?:схем|диаграмм)/i.test(userTurn.text) && /(?:нарис|постро|отрис|покаж|показ|созда|сдела|сгенер|вывед)/i.test(userTurn.text);
@@ -310,7 +319,7 @@ export class SessionService {
   }
 }
 
-function assistantTurn(state: SessionState, res: EngineResult, version: number, prefix?: string, extra: SourceRef[] = []): ChatTurn {
+function assistantTurn(state: SessionState, res: EngineResult, version: number, prefix?: string, extra: SourceRef[] = [], changeApplied = true): ChatTurn {
   const parts: string[] = [];
   if (prefix) parts.push(prefix);
   if (res.status === 'needs_clarification') {
@@ -319,7 +328,7 @@ function assistantTurn(state: SessionState, res: EngineResult, version: number, 
   } else {
     // В чат — первый абзац объяснения без разметки; полное объяснение во вкладке.
     parts.push(explain(state, res).split('\n\n')[0].replace(/\*\*/g, ''));
-    parts.push('Объяснение, таблица правил и схема обновлены.');
+    if (changeApplied) parts.push('Объяснение, таблица правил и схема обновлены.');
   }
   return {
     id: randomUUID(),

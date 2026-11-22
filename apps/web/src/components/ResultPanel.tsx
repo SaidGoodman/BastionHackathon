@@ -4,11 +4,10 @@ import { projectStarted } from '../api';
 import { CostPanel } from './CostPanel';
 import { DiagramView } from './DiagramView';
 import { RulesTable } from './RulesTable';
-import { Sources } from './Sources';
 
 type Tab = 'explain' | 'rules' | 'diagram' | 'cost';
 
-export function ResultPanel({ view, onRendered, diagramXml, onSaveDiagram }: { view: SessionView; onRendered: (version: number) => void; diagramXml: string; onSaveDiagram: (xml: string) => void }) {
+export function ResultPanel({ view, onRendered }: { view: SessionView; onRendered: (version: number) => void }) {
   const [tab, setTab] = useState<Tab>('diagram');
   const r = view.result;
   const hasProject = r.rules.length > 0 || r.status !== 'needs_clarification';
@@ -35,7 +34,7 @@ export function ResultPanel({ view, onRendered, diagramXml, onSaveDiagram }: { v
         {/* Схема монтируется всегда, чтобы отрисовка завершалась и при открытой другой вкладке. */}
         <div hidden={tab !== 'diagram'} className="fill">
           {hasProject ? (
-            <DiagramView xml={diagramXml} version={view.version} onRendered={onRendered} onSave={onSaveDiagram} />
+            <DiagramView xml={view.drawio} version={view.version} onRendered={onRendered} />
           ) : (
             <Empty text="Схема появится, когда станут понятны две сети и хотя бы один поток." onRendered={() => onRendered(view.version)} />
           )}
@@ -56,9 +55,6 @@ export function ResultPanel({ view, onRendered, diagramXml, onSaveDiagram }: { v
                 </ul>
               </div>
             )}
-            <div className="explain-sources">
-              Источники: <Sources sources={r.sources} />
-            </div>
           </div>
         )}
         {tab === 'cost' && <CostPanel view={view} />}

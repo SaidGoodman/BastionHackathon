@@ -36,7 +36,13 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; }
 .brand-title { font-weight: 700; }
 .brand-sub { font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .warn-chip { background: var(--amber); color: #303e48; border-radius: 99px; padding: 1px 8px; font-weight: 600; }
-.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
+.export-menu { position: relative; }
+.export-menu summary { list-style: none; }
+.export-menu summary::-webkit-details-marker { display: none; }
+.export-options { position: absolute; z-index: 20; top: calc(100% + 6px); right: 0; min-width: 190px; padding: 5px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); }
+.export-options button, .export-options a { display: block; width: 100%; padding: 9px 10px; border: 0; border-radius: 5px; background: transparent; color: var(--text); font: inherit; font-size: 14px; text-align: left; text-decoration: none; cursor: pointer; }
+.export-options button:hover, .export-options a:hover, .export-options button:focus-visible, .export-options a:focus-visible { background: var(--card); }
 
 .btn {
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px;
@@ -106,8 +112,7 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; }
 .start ul { padding-left: 20px; margin: 6px 0 12px; }
 .example { border: 1px dashed var(--accent); border-radius: var(--radius); padding: 10px 14px; background: rgba(224, 103, 51, 0.06); }
 .example-label { font-size: 12px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
-.example p { margin: 6px 0 10px; }
-.dev { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); }
+.example p { margin: 6px 0 0; }
 
 /* ------------------------------------------------ вопросы */
 .questions { border: 1px solid var(--teal); border-radius: var(--radius); background: var(--bg); padding: 12px; display: flex; flex-direction: column; gap: 12px; }
@@ -157,7 +162,6 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; }
 .md-block { margin-bottom: 10px; }
 .vendor { border: 1px solid var(--amber); border-radius: var(--radius); padding: 10px 14px; margin: 12px 0; }
 .vendor-head { font-weight: 600; color: var(--amber); }
-.explain-sources { margin-top: 14px; font-size: 13px; color: var(--muted); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
 table { border-collapse: collapse; width: 100%; font-size: 13px; }
@@ -176,8 +180,6 @@ ul.plain { margin: 0; padding: 0; list-style: none; }
 .kpi-l { font-size: 12px; color: var(--muted); }
 .cost h3 { font-size: 15px; margin: 18px 0 8px; }
 
-.diagram-editor { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; background: var(--panel); }
-.diagram-editor iframe { flex: 1; width: 100%; min-height: 0; border: 0; background: #fff; }
 
 .chat-diagram { margin-top: 10px; padding: 8px; background: #fff; border: 1px solid var(--line); border-radius: 4px; color: #111; overflow: auto; }
 .chat-diagram > div { min-width: 900px; min-height: 420px; }

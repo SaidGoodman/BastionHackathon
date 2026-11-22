@@ -9,8 +9,8 @@ const SESSION_KEY = 'synonyx.session';
 export function App() {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [view, setView] = useState<SessionView | null>(null);
-  const [editedDiagram, setEditedDiagram] = useState<{ id: string; version: number; source: string; xml: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const exportMenu = useRef<HTMLDetailsElement>(null);
   const [error, setError] = useState<{ message: string; retry: () => void } | null>(null);
   /** Шаг, для которого ждём завершения отрисовки схемы, чтобы отправить полное время. */
   const pendingTiming = useRef<{ turnId: string; t0: number; version: number } | null>(null);
@@ -22,6 +22,14 @@ export function App() {
       setView(v);
       safeSet(SESSION_KEY, v.id);
     });
+  }, []);
+
+  useEffect(() => {
+    const close = (event: MouseEvent) => {
+      if (!exportMenu.current?.contains(event.target as Node)) exportMenu.current?.removeAttribute('open');
+    };
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
   }, []);
 
   const newSession = async () => {
@@ -81,9 +89,8 @@ export function App() {
 
   if (!view) return <div className="boot">Загрузка…</div>;
 
-  const diagramXml = editedDiagram && editedDiagram.id === view.id && editedDiagram.version === view.version && editedDiagram.source === view.drawio ? editedDiagram.xml : view.drawio;
   const downloadDiagram = () => {
-    const url = URL.createObjectURL(new Blob([diagramXml], { type: 'application/xml' }));
+    const url = URL.createObjectURL(new Blob([view.drawio], { type: 'application/xml' }));
     const a = document.createElement('a');
     a.href = url; a.download = 'synonyx.drawio'; a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -103,16 +110,17 @@ export function App() {
           </div>
         </div>
         <div className="actions">
-          <button className="btn" onClick={undo} disabled={busy || !view.canUndo}>Откатить последнюю правку</button>
-          <button className="btn" onClick={downloadDiagram}>
-            Скачать .drawio
-          </button>
-          <a className="btn ghost" href={api.jsonUrl(view.id)} target="_blank" rel="noreferrer" title="Служебный JSON для экспертной проверки">
-            JSON для эксперта
-          </a>
-          <a className="btn ghost" href={api.logUrl(view.id)} download title="Журнал вызовов моделей и времени шагов">
-            Журнал
-          </a>
+          <button className="btn" onClick={undo} disabled={busy || !view.canUndo}>Отменить изменение</button>
+          <details className="export-menu" ref={exportMenu} onKeyDown={(event) => {
+            if (event.key === 'Escape') { exportMenu.current?.removeAttribute('open'); exportMenu.current?.querySelector('summary')?.focus(); }
+          }}>
+            <summary className="btn">Экспорт файлов <span aria-hidden="true">▾</span></summary>
+            <div className="export-options" onClick={() => exportMenu.current?.removeAttribute('open')}>
+              <button onClick={downloadDiagram}>Скачать схему</button>
+              <a href={api.jsonUrl(view.id)} download>Экспорт в JSON</a>
+              <a href={api.logUrl(view.id)} download>Экспорт журнала</a>
+            </div>
+          </details>
           <button className="btn primary" onClick={newSession} disabled={busy}>
             Новая сессия
           </button>
@@ -123,12 +131,10 @@ export function App() {
           view={view}
           busy={busy}
           error={error}
-          config={config}
           onSend={(text) => runStep(() => api.message(view.id, text))}
           onAnswers={(answers: { questionId: string; value: AnswerValue }[]) => runStep(() => api.answers(view.id, answers))}
-          onScenario={async (name) => setView(await api.scenario(view.id, name))}
         />
-        <ResultPanel view={view} diagramXml={diagramXml} onSaveDiagram={(xml) => setEditedDiagram({ id: view.id, version: view.version, source: view.drawio, xml })} onRendered={(version) => reportTiming(view.id, version)} />
+        <ResultPanel view={view} onRendered={(version) => reportTiming(view.id, version)} />
       </main>
     </div>
   );

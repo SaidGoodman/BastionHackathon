@@ -7,7 +7,7 @@ import type { ModelsConfig } from './config.js';
 import { pricesOf } from './config.js';
 import type { OpenRouterClient } from './openrouter.js';
 import { SYSTEM_PROMPT } from './prompt.js';
-import { InvalidModelOutputError } from './validation.js';
+import { InvalidModelOutputError, validateExtractOutput } from './validation.js';
 
 export type Intent =
   | 'describe' // новое описание задачи или дополнение
@@ -107,21 +107,27 @@ export class LlmExtractor implements Extractor {
       kb: (input.kb ?? []).map((k) => ({ id: k.id, file: k.file, section: k.section, text: k.text })),
       message: input.text,
     });
-    const { text } = await this.client.chat({
-      model: m.id!,
-      provider: m.provider,
-      prices: pricesOf(m),
-      purpose: 'extract',
-      sessionId: input.sessionId,
-      turnId: input.turnId,
-      jsonMode: true,
-      reasoning: m.reasoning ?? 'off',
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: user },
-      ],
-    });
-    return parseOutput(text, input.kb, true);
+    const messages: import('./openrouter.js').ChatMessage[] = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: user },
+    ];
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const { text } = await this.client.chat({
+        model: m.id!, provider: m.provider, prices: pricesOf(m), purpose: 'extract',
+        sessionId: input.sessionId, turnId: input.turnId, jsonMode: true,
+        reasoning: m.reasoning ?? 'off', messages,
+      });
+      try {
+        const output = parseOutput(text, input.kb, true);
+        validateExtractOutput(output, input.state, input.kb);
+        return output;
+      } catch (error) {
+        if (attempt > 0 || !(error instanceof InvalidModelOutputError || error instanceof SyntaxError)) throw error;
+        messages.push({ role: 'assistant', content: text });
+        messages.push({ role: 'user', content: `Предыдущий ответ не прошёл проверку: ${error.message}. Исправь JSON. Не выдумывай изменения: примени однозначные корректные части запроса, а по остальным кратко попроси уточнение. Для FTP и SMB проверь тип потока и способ передачи.` });
+      }
+    }
+    throw new InvalidModelOutputError('не удалось исправить ответ');
   }
 }
 

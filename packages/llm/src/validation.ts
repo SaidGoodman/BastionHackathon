@@ -158,5 +158,6 @@ function validateSpec(spec: any, methods: readonly string[], field: string, devi
   if (!isObject(spec)) fail(`${field} должен быть объектом, null или unknown`);
   if (!methods.includes(spec.method)) fail(`${field}.method имеет недопустимое значение`);
   if (spec.protocol !== undefined && spec.protocol !== null && spec.protocol !== 'unknown' && !FILE_PROTOCOLS.includes(spec.protocol)) fail(`${field}.protocol имеет недопустимое значение`);
+  if (spec.method === 'manual' && spec.protocol != null && spec.protocol !== 'unknown' && spec.protocol !== 'SFTP') fail(`${field}: ручная передача поддерживает только SFTP; для FTP или SMB требуется автоматическая передача`);
   for (const f of ['storage', 'actor']) if (spec[f] !== undefined) { string(spec[f], `${field}.${f}`); if (f === 'storage') requireRef(devices, spec[f], 'устройство'); }
 }

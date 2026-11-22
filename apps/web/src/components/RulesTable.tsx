@@ -1,5 +1,4 @@
 import { modeLabel, type Rule, type SessionView } from '@synonyx/core';
-import { Sources } from './Sources';
 
 export function RulesTable({ view }: { view: SessionView }) {
   const { result: r, state } = view;
@@ -46,9 +45,6 @@ export function RulesTable({ view }: { view: SessionView }) {
                 <td>{checksCell(rule, net)}</td>
                 <td className="just">
                   {rule.justification}
-                  <div>
-                    <Sources sources={rule.sources} />
-                  </div>
                 </td>
               </tr>
             ))}

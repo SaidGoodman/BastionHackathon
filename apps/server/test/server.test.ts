@@ -159,6 +159,59 @@ describe('цикл сессии', () => {
     expect(r2.usage.calls).toBe(2);
   });
 
+  it('изменения количества и протокола отражаются в состоянии и скачиваемой схеме', async () => {
+    const { app } = setup((input) => input.text === 'описание'
+      ? { intent: 'describe', ops: fixtures.F01 }
+      : input.text === 'три сервера'
+        ? { intent: 'modify', ops: [{ op: 'upsert_device', id: 'logsrv', count: 3 }] }
+        : { intent: 'modify', ops: [{ op: 'upsert_data_flow', id: 'f1', protocol: 'TCP', port: 515 }] });
+    const session = (await post(app, '/api/sessions')).json;
+    const url = `/api/sessions/${session.id}/messages`;
+    const initial = (await post(app, url, { text: 'описание' })).json;
+    const count = (await post(app, url, { text: 'три сервера' })).json;
+    expect(count.version).toBe(initial.version + 1);
+    expect(count.state.devices.find((d: any) => d.id === 'logsrv').count).toBe(3);
+    expect(count.drawio).toContain('×3');
+    const protocol = (await post(app, url, { text: 'TCP 515' })).json;
+    expect(protocol.version).toBe(count.version + 1);
+    expect(protocol.state.flows.find((f: any) => f.id === 'f1')).toMatchObject({ protocol: 'TCP', port: 515 });
+    expect(protocol.drawio).toContain('TCP 515');
+    expect((await app.inject({ method: 'GET', url: `/api/sessions/${session.id}/diagram.drawio` })).body).toBe(protocol.drawio);
+    await app.close();
+  });
+
+  it('отклоняет FTP для ручной передачи, не подтверждая невозможную правку', async () => {
+    const { app } = setup((input) => input.text === 'описание'
+      ? { intent: 'describe', ops: fixtures.F04 }
+      : { intent: 'modify', reply: 'Протокол изменён на FTP.', ops: [{ op: 'upsert_file_flow', id: 'f1', transfers: [{ from: 'n1', to: 'n2', send: { method: 'manual', protocol: 'FTP' }, receive: { method: 'manual' } }] }] });
+    const session = (await post(app, '/api/sessions')).json;
+    const url = `/api/sessions/${session.id}/messages`;
+    const initial = (await post(app, url, { text: 'описание' })).json;
+    const rejected = await post(app, url, { text: 'поставь FTP' });
+    expect(rejected.status).toBe(502);
+    expect(rejected.json.error).toContain('ручная передача поддерживает только SFTP');
+    const saved = (await app.inject({ method: 'GET', url: `/api/sessions/${session.id}` })).json();
+    expect(saved.version).toBe(initial.version);
+    expect(saved.drawio).toBe(initial.drawio);
+    await app.close();
+  });
+
+  it('не сообщает об успешной правке, если модель не изменила состояние', async () => {
+    const { app } = setup((input) => input.text === 'описание'
+      ? { intent: 'describe', ops: fixtures.F01 }
+      : { intent: 'modify', ops: [], reply: 'Количество серверов изменено.' });
+    const session = (await post(app, '/api/sessions')).json;
+    const url = `/api/sessions/${session.id}/messages`;
+    const initial = (await post(app, url, { text: 'описание' })).json;
+    const result = (await post(app, url, { text: 'измени количество' })).json;
+    expect(result.version).toBe(initial.version);
+    expect(result.drawio).toBe(initial.drawio);
+    expect(result.history.at(-1).text).toContain('Изменение не применено');
+    expect(result.history.at(-1).text).not.toContain('схема обновлены');
+    expect(result.history.at(-1).text).not.toContain('Количество серверов изменено');
+    await app.close();
+  });
+
   it('недопустимая правка не ломает последнее корректное решение', async () => {
     let n = 0;
     const { app } = setup(() =>
