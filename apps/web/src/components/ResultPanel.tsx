@@ -8,7 +8,7 @@ import { Sources } from './Sources';
 
 type Tab = 'explain' | 'rules' | 'diagram' | 'cost';
 
-export function ResultPanel({ view, onRendered }: { view: SessionView; onRendered: (version: number) => void }) {
+export function ResultPanel({ view, onRendered, diagramXml, onSaveDiagram }: { view: SessionView; onRendered: (version: number) => void; diagramXml: string; onSaveDiagram: (xml: string) => void }) {
   const [tab, setTab] = useState<Tab>('diagram');
   const r = view.result;
   const hasProject = r.rules.length > 0 || r.status !== 'needs_clarification';
@@ -35,7 +35,7 @@ export function ResultPanel({ view, onRendered }: { view: SessionView; onRendere
         {/* Схема монтируется всегда, чтобы отрисовка завершалась и при открытой другой вкладке. */}
         <div hidden={tab !== 'diagram'} className="fill">
           {hasProject ? (
-            <DiagramView xml={view.drawio} version={view.version} onRendered={onRendered} />
+            <DiagramView xml={diagramXml} version={view.version} onRendered={onRendered} onSave={onSaveDiagram} />
           ) : (
             <Empty text="Схема появится, когда станут понятны две сети и хотя бы один поток." onRendered={() => onRendered(view.version)} />
           )}

@@ -13,9 +13,17 @@ npm run typecheck
 
 Сборка для проверяющих: `npm run build`, затем `npm start` — интерфейс и API на http://127.0.0.1:8787.
 
-Модель: заполнить `config/models.json` (id, ссылка на карточку OpenRouter, тарифы ≤ $0,10/млн на входе) и задать переменную `OPENROUTER_API_KEY`.
+Модель: заполнить `config/models.json` (id, ссылка на карточку OpenRouter, тарифы ≤ $0,10/млн на входе) и задать ключ в `.env`. Для ProxyAPI используются `PROXYAPI_KEY_DEEPSEEK` и `PROXYAPI_KEY_GLM`; ключи не коммитятся.
 Без этого свободный текст не разбирается, но ответы на карточки вопросов, схема, таблица и экспорт работают.
 Сервер проверяет лимит входного тарифа при старте. Порт сервера — `SYNONYX_PORT`.
+
+Проверка обеих моделей на 10 открытых сценариях:
+
+```powershell
+npm run eval -- --only deepseek-v4.1-flash,glm-5.3-flash --scenarios F02,F07,F01,F04,N01,N05,U01,U02a,U02b,U04
+```
+
+Кандидаты и их ProxyAPI-ключи описаны в `config/eval-candidates.json`; подробный JSON-отчёт сохраняется в `examples/eval-<время>.json`.
 
 ## API
 

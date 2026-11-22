@@ -3,6 +3,7 @@ import type { AnswerValue, ChatTurn, SessionView } from '@synonyx/core';
 import { projectStarted, type AppConfig } from '../api';
 import { Questions } from './Questions';
 import { Sources } from './Sources';
+import { loadViewer } from './DiagramView';
 
 const EXAMPLE =
   'Есть закрытая сеть цеха и офисная сеть. Два сервера цеха отправляют журналы на сервер в офисе по UDP 514. ' +
@@ -132,7 +133,27 @@ function Turn({ turn }: { turn: ChatTurn }) {
       ) : (
         <div className="text">{turn.text}</div>
       )}
+      {turn.diagramXml && <ChatDiagram xml={turn.diagramXml} />}
       {turn.role === 'assistant' && turn.sources && turn.sources.length > 0 && <Sources sources={turn.sources} compact />}
     </div>
   );
+}
+
+/** Снимок в истории не меняется при последующих изменениях проекта. */
+function ChatDiagram({ xml }: { xml: string }) {
+  const host = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    loadViewer().then(() => {
+      if (cancelled || !host.current) return;
+      const el = document.createElement('div');
+      el.className = 'mxgraph';
+      el.setAttribute('data-mxgraph', JSON.stringify({ xml, toolbar: '', nav: false, resize: true, lightbox: true }));
+      host.current.replaceChildren(el);
+      window.GraphViewer.createViewerForElement(el);
+    }).catch(() => { if (!cancelled) setError(true); });
+    return () => { cancelled = true; };
+  }, [xml]);
+  return <div className="chat-diagram" aria-label="Схема в сообщении">{error ? 'Не удалось загрузить схему. Откройте вкладку «Схема».' : <div ref={host} />}</div>;
 }

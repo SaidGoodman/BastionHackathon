@@ -201,7 +201,7 @@ export function buildDiagram(state: SessionState, res: EngineResult): Diagram {
     vertex(
       'seg_open',
       `<b>ОТКРЫТАЯ СЕТЬ</b><br><span style="font-weight:normal;font-size:11px">${html(openName)}</span>`,
-      S.segment('#E06733'),
+      S.segment('#111111'),
       { x: OPEN_X, y: TOP, w: 320, h: segBottom - TOP },
     ),
   );
@@ -209,7 +209,7 @@ export function buildDiagram(state: SessionState, res: EngineResult): Diagram {
     vertex(
       'seg_closed',
       `<b>ЗАКРЫТЫЙ СЕГМЕНТ</b><br><span style="font-weight:normal;font-size:11px">${html(closedName)}${protectedByDecision && res.assumptions.length ? ' · защищаемая сторона по проектному решению' : ''}</span>`,
-      S.segment('#35C4AF'),
+      S.segment('#444444'),
       { x: closedX, y: TOP, w: closedRight - closedX, h: segBottom - TOP },
     ),
   );
@@ -219,7 +219,7 @@ export function buildDiagram(state: SessionState, res: EngineResult): Diagram {
       cells.push(
         vertex(
           c.id,
-          `<b>${html(c.name)}</b>` + (c.note ? `<br><font color="#35C4AF" style="font-size:11px">${html(c.note)}</font>` : ''),
+          `<b>${html(c.name)}</b>` + (c.note ? `<br><font color="#444444" style="font-size:11px">${html(c.note)}</font>` : ''),
           c.placeholder ? S.placeholderCard : S.card,
           c.box,
           s === 'open' ? 'card_open' : 'card_closed',

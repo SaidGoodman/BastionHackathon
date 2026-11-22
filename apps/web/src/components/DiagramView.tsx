@@ -13,7 +13,7 @@ declare global {
 }
 
 let loader: Promise<void> | null = null;
-function loadViewer(): Promise<void> {
+export function loadViewer(): Promise<void> {
   if (window.GraphViewer) return Promise.resolve();
   loader ??= new Promise((resolve, reject) => {
     const s = document.createElement('script');
@@ -29,10 +29,47 @@ function loadViewer(): Promise<void> {
   return loader;
 }
 
-export function DiagramView({ xml, version, onRendered }: { xml: string; version: number; onRendered: (version: number) => void }) {
+export function DiagramView({ xml, version, onRendered, onSave }: { xml: string; version: number; onRendered: (version: number) => void; onSave: (xml: string) => void }) {
   const host = useRef<HTMLDivElement>(null);
   const viewer = useRef<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const editor = useRef<HTMLIFrameElement>(null);
+  const [saving, setSaving] = useState(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const saveAndClose = () => {
+    setSaving(true);
+    setError(null);
+    editor.current?.contentWindow?.postMessage(JSON.stringify({ action: 'export', format: 'xml' }), 'https://embed.diagrams.net');
+    saveTimer.current = setTimeout(() => {
+      setSaving(false);
+      setError('Не удалось получить схему из редактора. Попробуйте ещё раз.');
+    }, 10000);
+  };
+
+  useEffect(() => {
+    if (!editing) return;
+    const receive = (event: MessageEvent) => {
+      if (event.origin !== 'https://embed.diagrams.net' || event.source !== editor.current?.contentWindow) return;
+      let data: any;
+      try { data = JSON.parse(event.data); } catch { return; }
+      if (data.event === 'init') editor.current?.contentWindow?.postMessage(JSON.stringify({ action: 'load', xml, autosave: 0 }), 'https://embed.diagrams.net');
+      if ((data.event === 'export' && typeof data.data === 'string') || (data.event === 'save' && typeof data.xml === 'string')) {
+        if (saveTimer.current) clearTimeout(saveTimer.current);
+        saveTimer.current = null;
+        onSave(data.event === 'export' ? data.data : data.xml);
+        setSaving(false);
+        setEditing(false);
+      }
+      if (data.event === 'exit') saveAndClose();
+    };
+    window.addEventListener('message', receive);
+    return () => {
+      window.removeEventListener('message', receive);
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [editing, xml, onSave]);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,7 +125,15 @@ export function DiagramView({ xml, version, onRendered }: { xml: string; version
 
   return (
     <div className="diagram">
+      {editing && (
+        <div className="diagram-editor">
+          {error && <div className="error-box">{error}</div>}
+          {saving && <div className="error-box">Сохранение схемы…</div>}
+          <iframe ref={editor} title="Редактор схемы draw.io" src="https://embed.diagrams.net/?embed=1&proto=json&spin=1&saveAndExit=1&noExitBtn=0&ui=min" />
+        </div>
+      )}
       <div className="diagram-tools">
+        <button className="btn" onClick={() => setEditing(true)}>Редактировать</button>
         <button className="btn ghost" onClick={() => zoom(1.25)} aria-label="Увеличить">
           ＋
         </button>

@@ -235,9 +235,15 @@ export class SessionService {
       const result = evaluate(rec.state);
       rec.history.push(userTurn);
       const changed = CHANGING.has(out.intent);
-      rec.history.push(
-        changed ? assistantTurn(rec.state, result, rec.version, reply, out.sources) : { id: randomUUID(), role: 'assistant', at: now(), kind: 'reply', text: reply ?? 'Готово.', resultVersion: rec.version, sources: out.sources },
-      );
+      const assistant: ChatTurn = changed
+        ? assistantTurn(rec.state, result, rec.version, reply, out.sources)
+        : { id: randomUUID(), role: 'assistant', at: now(), kind: 'reply', text: reply ?? 'Готово.', resultVersion: rec.version, sources: out.sources };
+      // При явной просьбе показать схему сохраняем снимок именно этого ответа в истории.
+      const diagramRequest = /(?:схем|диаграмм)/i.test(userTurn.text) && /(?:нарис|постро|отрис|покаж|показ|созда|сдела|сгенер|вывед)/i.test(userTurn.text);
+      if (kind === 'message' && diagramRequest && (result.rules.length > 0 || result.status !== 'needs_clarification')) {
+        assistant.diagramXml = toDrawio(rec.state, result);
+      }
+      rec.history.push(assistant);
       const timing: TurnTiming = {
         turn_id: turnId,
         kind,

@@ -64,7 +64,7 @@ function SourceModal({ source, onClose }: { source: SourceRef; onClose: () => vo
             <div className="modal-title">{source.section}</div>
           </div>
           <button className="btn ghost" onClick={onClose} aria-label="Закрыть">
-            ✕
+            Закрыть
           </button>
         </div>
         <div className="modal-body">

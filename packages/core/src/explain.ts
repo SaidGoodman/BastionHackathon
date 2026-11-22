@@ -96,7 +96,7 @@ export function explain(state: SessionState, res: EngineResult): string {
   }
 
   for (const a of res.assumptions) out.push('', `Проектное решение: ${a.text}`);
-  for (const i of res.issues) out.push('', (i.severity === 'error' ? '⚠ ' : '') + i.text);
+  for (const i of res.issues) out.push('', (i.severity === 'error' ? 'Ошибка: ' : '') + i.text);
 
   if (state.requestsForVendor.length) {
     out.push('', 'Эти пожелания можно передать разработчику продукта:');

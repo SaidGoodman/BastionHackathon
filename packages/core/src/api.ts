@@ -16,6 +16,8 @@ export interface ChatTurn {
   /** Версия результата, к которой относится ответ. */
   resultVersion?: number;
   sources?: SourceRef[];
+  /** Снимок схемы, приложенный к ответу. */
+  diagramXml?: string;
 }
 
 export interface TurnTiming {

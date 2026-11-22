@@ -9,6 +9,7 @@ const SESSION_KEY = 'synonyx.session';
 export function App() {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [view, setView] = useState<SessionView | null>(null);
+  const [editedDiagram, setEditedDiagram] = useState<{ id: string; version: number; source: string; xml: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ message: string; retry: () => void } | null>(null);
   /** Шаг, для которого ждём завершения отрисовки схемы, чтобы отправить полное время. */
@@ -67,6 +68,14 @@ export function App() {
 
   if (!view) return <div className="boot">Загрузка…</div>;
 
+  const diagramXml = editedDiagram && editedDiagram.id === view.id && editedDiagram.version === view.version && editedDiagram.source === view.drawio ? editedDiagram.xml : view.drawio;
+  const downloadDiagram = () => {
+    const url = URL.createObjectURL(new Blob([diagramXml], { type: 'application/xml' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = 'synonyx.drawio'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   return (
     <div className="app">
       <header className="topbar">
@@ -81,9 +90,9 @@ export function App() {
           </div>
         </div>
         <div className="actions">
-          <a className="btn" href={api.drawioUrl(view.id)} download>
+          <button className="btn" onClick={downloadDiagram}>
             Скачать .drawio
-          </a>
+          </button>
           <a className="btn ghost" href={api.jsonUrl(view.id)} target="_blank" rel="noreferrer" title="Служебный JSON для экспертной проверки">
             JSON для эксперта
           </a>
@@ -105,7 +114,7 @@ export function App() {
           onAnswers={(answers: { questionId: string; value: AnswerValue }[]) => runStep(() => api.answers(view.id, answers))}
           onScenario={async (name) => setView(await api.scenario(view.id, name))}
         />
-        <ResultPanel view={view} onRendered={(version) => reportTiming(view.id, version)} />
+        <ResultPanel view={view} diagramXml={diagramXml} onSaveDiagram={(xml) => setEditedDiagram({ id: view.id, version: view.version, source: view.drawio, xml })} onRendered={(version) => reportTiming(view.id, version)} />
       </main>
     </div>
   );

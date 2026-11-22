@@ -58,7 +58,7 @@ export function Questions({
                       aria-pressed={x.selected.includes(o.value)}
                       onClick={() => toggle(q, o.value)}
                     >
-                      {q.multi && <span className="box" aria-hidden>{x.selected.includes(o.value) ? '✓' : ''}</span>}
+                      {q.multi && <span className="box" aria-hidden>{x.selected.includes(o.value) ? '●' : ''}</span>}
                       {o.label}
                     </button>
                   ))}

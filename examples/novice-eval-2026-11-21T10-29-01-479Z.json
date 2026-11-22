@@ -1,0 +1,752 @@
+{
+  "at": "2026-11-21T10:29:01.479Z",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "base_url": "https://api.proxyapi.ru/openrouter/v1",
+  "total": 10,
+  "successful": 10,
+  "calls": 10,
+  "reports": [
+    {
+      "index": 1,
+      "prompt": "У нас есть закрытая сеть на заводе и обычная офисная сеть. Нужно, чтобы показания оборудования попадали в офис. Как это лучше описать?",
+      "ok": true,
+      "ms": 2514,
+      "intent": "describe",
+      "reply": "Записал две сети и поток показаний оборудования из закрытой сети завода в офис.",
+      "ops": [
+        {
+          "op": "set_network",
+          "id": "n1",
+          "name": "Офисная сеть",
+          "trust": "open"
+        },
+        {
+          "op": "set_network",
+          "id": "n2",
+          "name": "Закрытая сеть завода",
+          "trust": "closed"
+        },
+        {
+          "op": "upsert_device",
+          "id": "equip",
+          "name": "Оборудование завода",
+          "networkId": "n2"
+        },
+        {
+          "op": "upsert_device",
+          "id": "office",
+          "name": "Системы в офисе",
+          "networkId": "n1"
+        },
+        {
+          "op": "upsert_data_flow",
+          "id": "d1",
+          "description": "Показания оборудования в офис",
+          "purpose": "telemetry",
+          "senders": [
+            "equip"
+          ],
+          "receivers": [
+            "office"
+          ],
+          "protocol": null,
+          "port": null,
+          "reverse": null
+        }
+      ],
+      "operation_errors": [],
+      "questions": [
+        "По какому протоколу идут данные?",
+        "Нужна ли передача в обратную сторону?"
+      ],
+      "calls": [
+        {
+          "session_id": "novice-eval",
+          "turn_id": "novice-01",
+          "call_id": "31509593-425d-4269-a00e-8a7a4442ef7a",
+          "model_id": "deepseek/deepseek-v4.1-flash",
+          "provider": null,
+          "purpose": "extract",
+          "started_at": "2026-11-21T10:28:39.146Z",
+          "prices": {
+            "input": 0.05,
+            "output": 0.199
+          },
+          "attempt": 1,
+          "finished_at": "2026-11-21T10:28:41.656Z",
+          "status": "ok",
+          "input_tokens": 5221,
+          "output_tokens": 201,
+          "cached_tokens": 2048,
+          "reasoning_tokens": 0,
+          "cost_input_usd": 0.00026105000000000003,
+          "cost_output_usd": 0.000039999,
+          "cost_total_usd": 0.000301049,
+          "actual_cost_usd": null,
+          "usage_source": "provider_response",
+          "provider_response_id": "021795256919959a4a9e4d164f3c176730993b0b2e8dd9dfc79cb",
+          "raw_usage": {
+            "completion_tokens": 201,
+            "prompt_tokens": 5221,
+            "total_tokens": 5422,
+            "prompt_tokens_details": {
+              "cached_tokens": 2048
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "Я не знаю, какой там порт. Компьютер в цехе должен отправлять отчёты на сервер в офисе, обратно ничего не надо.",
+      "ok": true,
+      "ms": 2204,
+      "intent": "describe",
+      "reply": "Записал: компьютер в цехе отправляет отчёты на сервер в офисе, обратной передачи нет.",
+      "ops": [
+        {
+          "op": "set_network",
+          "id": "n1",
+          "name": "Сеть цеха",
+          "trust": "closed"
+        },
+        {
+          "op": "set_network",
+          "id": "n2",
+          "name": "Офисная сеть",
+          "trust": "open"
+        },
+        {
+          "op": "upsert_device",
+          "id": "pc_ceh",
+          "name": "Компьютер в цехе",
+          "networkId": "n1"
+        },
+        {
+          "op": "upsert_device",
+          "id": "srv_office",
+          "name": "Сервер в офисе",
+          "networkId": "n2"
+        },
+        {
+          "op": "upsert_data_flow",
+          "id": "d1",
+          "description": "Отчёты из цеха на сервер в офисе",
+          "senders": [
+            "pc_ceh"
+          ],
+          "receivers": [
+            "srv_office"
+          ],
+          "protocol": null,
+          "port": null,
+          "reverse": false
+        }
+      ],
+      "operation_errors": [],
+      "questions": [
+        "По какому протоколу идут данные?"
+      ],
+      "calls": [
+        {
+          "session_id": "novice-eval",
+          "turn_id": "novice-02",
+          "call_id": "14e3d5e2-7a6c-4bb1-94b9-239b415538cd",
+          "model_id": "deepseek/deepseek-v4.1-flash",
+          "provider": null,
+          "purpose": "extract",
+          "started_at": "2026-11-21T10:28:41.661Z",
+          "prices": {
+            "input": 0.05,
+            "output": 0.199
+          },
+          "attempt": 1,
+          "finished_at": "2026-11-21T10:28:43.863Z",
+          "status": "ok",
+          "input_tokens": 4270,
+          "output_tokens": 210,
+          "cached_tokens": 2048,
+          "reasoning_tokens": 0,
+          "cost_input_usd": 0.0002135,
+          "cost_output_usd": 0.00004179,
+          "cost_total_usd": 0.00025529000000000003,
+          "actual_cost_usd": null,
+          "usage_source": "provider_response",
+          "provider_response_id": "02179525692218177dd13f2098096eba9569e39b59e750ca47e30",
+          "raw_usage": {
+            "completion_tokens": 210,
+            "prompt_tokens": 4270,
+            "total_tokens": 4480,
+            "prompt_tokens_details": {
+              "cached_tokens": 2048
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "Сотрудник приносит файлы на флешке, их надо проверить и безопасно положить в закрытую сеть.",
+      "ok": true,
+      "ms": 2241,
+      "intent": "describe",
+      "reply": "Записал: файлы с флешки передаются в закрытую сеть, проверки не уточнены.",
+      "ops": [
+        {
+          "op": "set_network",
+          "id": "n1",
+          "name": "Закрытая сеть",
+          "trust": "closed"
+        },
+        {
+          "op": "upsert_file_flow",
+          "id": "f1",
+          "description": "Файлы с флешки в закрытую сеть",
+          "transfers": [
+            {
+              "from": null,
+              "to": "n1",
+              "send": {
+                "method": "usb"
+              },
+              "receive": null
+            }
+          ],
+          "checks": null,
+          "differentChecks": null,
+          "isolation": null,
+          "users": {
+            "exact": 1
+          },
+          "userNames": [
+            "Сотрудник"
+          ]
+        }
+      ],
+      "operation_errors": [],
+      "questions": [
+        "Между какими двумя сетями нужен обмен? Опишите вторую сеть."
+      ],
+      "calls": [
+        {
+          "session_id": "novice-eval",
+          "turn_id": "novice-03",
+          "call_id": "fcd75aeb-5d8a-481e-ae5b-3760e9fe7809",
+          "model_id": "deepseek/deepseek-v4.1-flash",
+          "provider": null,
+          "purpose": "extract",
+          "started_at": "2026-11-21T10:28:43.864Z",
+          "prices": {
+            "input": 0.05,
+            "output": 0.199
+          },
+          "attempt": 1,
+          "finished_at": "2026-11-21T10:28:46.104Z",
+          "status": "ok",
+          "input_tokens": 4199,
+          "output_tokens": 187,
+          "cached_tokens": 2048,
+          "reasoning_tokens": 0,
+          "cost_input_usd": 0.00020995,
+          "cost_output_usd": 0.000037213,
+          "cost_total_usd": 0.000247163,
+          "actual_cost_usd": null,
+          "usage_source": "provider_response",
+          "provider_response_id": "021795256924376aaaf13501739a5ff290af8d9343e27fc5238e0",
+          "raw_usage": {
+            "completion_tokens": 187,
+            "prompt_tokens": 4199,
+            "total_tokens": 4386,
+            "prompt_tokens_details": {
+              "cached_tokens": 2048
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "prompt": "Можно ли сделать так, чтобы офис забирал файлы из цеха сам, когда они появляются? Пользователей нет.",
+      "ok": true,
+      "ms": 2103,
+      "intent": "product_question",
+      "reply": "Да. Автоматический забор файлов (PULL) работает на отправляющей стороне: «Синоникс» сам забирает файлы из хранилища по расписанию. В одном правиле PULL может быть только на одном Узле, и на каждое правило с PULL нужен один пользователь — то есть «пользователей нет» при автоматическом заборе не получится.",
+      "ops": [],
+      "operation_errors": [],
+      "questions": [
+        "Что нужно передавать между сетями?"
+      ],
+      "calls": [
+        {
+          "session_id": "novice-eval",
+          "turn_id": "novice-04",
+          "call_id": "e0120fad-95a4-416c-a661-82be33b2ff58",
+          "model_id": "deepseek/deepseek-v4.1-flash",
+          "provider": null,
+          "purpose": "extract",
+          "started_at": "2026-11-21T10:28:46.106Z",
+          "prices": {
+            "input": 0.05,
+            "output": 0.199
+          },
+          "attempt": 1,
+          "finished_at": "2026-11-21T10:28:48.207Z",
+          "status": "ok",
+          "input_tokens": 4548,
+          "output_tokens": 127,
+          "cached_tokens": 2048,
+          "reasoning_tokens": 0,
+          "cost_input_usd": 0.0002274,
+          "cost_output_usd": 0.000025273,
+          "cost_total_usd": 0.000252673,
+          "actual_cost_usd": null,
+          "usage_source": "provider_response",
+          "provider_response_id": "0217952569266749e89f26b858b9d25ce524a85522bfdaf36b3e7",
+          "raw_usage": {
+            "completion_tokens": 127,
+            "prompt_tokens": 4548,
+            "total_tokens": 4675,
+            "prompt_tokens_details": {
+              "cached_tokens": 2048
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "prompt": "Две группы людей отправляют документы в закрытую часть. Они не должны видеть документы друг друга.",
+      "ok": true,
+      "ms": 1899,
+      "intent": "describe",
+      "reply": "",
+      "ops": [
+        {
+          "op": "set_network",
+          "id": "n1",
+          "name": "Закрытая часть",
+          "trust": "closed"
+        },
+        {
+          "op": "set_network",
+          "id": "n2",
+          "name": "Сеть групп",
+          "trust": null
+        },
+        {
+          "op": "upsert_file_flow",
+          "id": "f1",
+          "description": "Отправка документов в закрытую часть",
+          "transfers": [
+            {
+              "from": "n2",
+              "to": "n1",
+              "send": {
+                "method": "manual"
+              },
+              "receive": null
+            }
+          ],
+          "checks": null,
+          "differentChecks": null,
+          "isolation": true,
+          "isolatedGroups": 2,
+          "users": null
+        }
+      ],
+      "operation_errors": [],
+      "questions": [
+        "Куда файлы должны попасть в «Закрытая часть»?",
+        "Какие проверки файлов нужны?",
+        "Сколько человек будут вручную передавать или забирать файлы?",
+        "Нужны ли на одной стороне разные проверки для разных файлов или пользователей?"
+      ],
+      "calls": [
+        {
+          "session_id": "novice-eval",
+          "turn_id": "novice-05",
+          "call_id": "eab377e0-10e3-4452-8507-c44f88a632ea",
+          "model_id": "deepseek/deepseek-v4.1-flash",
+          "provider": null,
+          "purpose": "extract",
+          "started_at": "2026-11-21T10:28:48.209Z",
+          "prices": {
+            "input": 0.05,
+            "output": 0.199
+          },
+          "attempt": 1,
+          "finished_at": "2026-11-21T10:28:50.107Z",
+          "status": "ok",
+          "input_tokens": 4075,
+          "output_tokens": 141,
+          "cached_tokens": 2688,
+          "reasoning_tokens": 0,
+          "cost_input_usd": 0.00020375,
+          "cost_output_usd": 0.000028059,
+          "cost_total_usd": 0.000231809,
+          "actual_cost_usd": null,
+          "usage_source": "provider_response",
+          "provider_response_id": "0217952569287167dca00f85baedac28bed28ae8d5f3a9922e800",
+          "raw_usage": {
+            "completion_tokens": 141,
+            "prompt_tokens": 4075,
+            "total_tokens": 4216,
+            "prompt_tokens_details": {
+              "cached_tokens": 2688
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "prompt": "Нужно передавать время с одного компьютера на другой, чтобы часы были одинаковые.",
+      "ok": true,
+      "ms": 2045,
+      "intent": "describe",
+      "reply": "Записана синхронизация времени между двумя компьютерами.",
+      "ops": [
+        {
+          "op": "upsert_device",
+          "id": "time_src",
+          "name": "Компьютер-источник времени",
+          "networkId": null
+        },
+        {
+          "op": "upsert_device",
+          "id": "time_dst",
+          "name": "Компьютер-получатель времени",
+          "networkId": null
+        },
+        {
+          "op": "upsert_data_flow",
+          "id": "d1",
+          "description": "Синхронизация времени",
+          "purpose": "time",
+          "isTimeSync": true,
+          "senders": [
+            "time_src"
+          ],
+          "receivers": [
+            "time_dst"
+          ],
+          "protocol": "UDP",
+          "port": null,
+          "reverse": false
+        }
+      ],
+      "operation_errors": [
+        "Устройство time_src: не указана сеть",
+        "Устройство time_dst: не указана сеть"
+      ],
+      "questions": [
+        "Между какими двумя сетями нужен обмен? Опишите вторую сеть."
+      ],
+      "calls": [
+        {
+          "session_id": "novice-eval",
+          "turn_id": "novice-06",
+          "call_id": "41709bd2-5291-485f-b091-7566e0c3650d",
+          "model_id": "deepseek/deepseek-v4.1-flash",
+          "provider": null,
+          "purpose": "extract",
+          "started_at": "2026-11-21T10:28:50.110Z",
+          "prices": {
+            "input": 0.05,
+            "output": 0.199
+          },
+          "attempt": 1,
+          "finished_at": "2026-11-21T10:28:52.154Z",
+          "status": "ok",
+          "input_tokens": 4240,
+          "output_tokens": 162,
+          "cached_tokens": 2048,
+          "reasoning_tokens": 0,
+          "cost_input_usd": 0.000212,
+          "cost_output_usd": 0.000032238,
+          "cost_total_usd": 0.00024423800000000003,
+          "actual_cost_usd": null,
+          "usage_source": "provider_response",
+          "provider_response_id": "02179525693062145fbeaee288e5855715c9c7643a6f5a8bd1aa6",
+          "raw_usage": {
+            "completion_tokens": 162,
+            "prompt_tokens": 4240,
+            "total_tokens": 4402,
+            "prompt_tokens_details": {
+              "cached_tokens": 2048
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "prompt": "Есть офис, производство и сеть подрядчика. Хотим соединить всё одним устройством.",
+      "ok": true,
+      "ms": 1780,
+      "intent": "describe",
+      "reply": "Записаны три сети: офис, производство и сеть подрядчика.",
+      "ops": [
+        {
+          "op": "set_network",
+          "id": "n1",
+          "name": "Офис",
+          "trust": "open"
+        },
+        {
+          "op": "set_network",
+          "id": "n2",
+          "name": "Производство",
+          "trust": "closed"
+        },
+        {
+          "op": "set_network",
+          "id": "n3",
+          "name": "Сеть подрядчика",
+          "trust": null
+        }
+      ],
+      "operation_errors": [],
+      "questions": [
+        "Одним «Синониксом» проектируется граница между двумя сетями. Какую пару сетей рассмотрим сейчас?"
+      ],
+      "calls": [
+        {
+          "session_id": "novice-eval",
+          "turn_id": "novice-07",
+          "call_id": "223bd372-216a-472b-bdd9-84d76a32d12b",
+          "model_id": "deepseek/deepseek-v4.1-flash",
+          "provider": null,
+          "purpose": "extract",
+          "started_at": "2026-11-21T10:28:52.156Z",
+          "prices": {
+            "input": 0.05,
+            "output": 0.199
+          },
+          "attempt": 1,
+          "finished_at": "2026-11-21T10:28:53.935Z",
+          "status": "ok",
+          "input_tokens": 4190,
+          "output_tokens": 105,
+          "cached_tokens": 2048,
+          "reasoning_tokens": 0,
+          "cost_input_usd": 0.0002095,
+          "cost_output_usd": 0.000020895,
+          "cost_total_usd": 0.000230395,
+          "actual_cost_usd": null,
+          "usage_source": "provider_response",
+          "provider_response_id": "0217952569326610958c43c09b2d8895d306984ebab6585c80ce7",
+          "raw_usage": {
+            "completion_tokens": 105,
+            "prompt_tokens": 4190,
+            "total_tokens": 4295,
+            "prompt_tokens_details": {
+              "cached_tokens": 2048
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "prompt": "Что вообще делает Синоникс? Объясните простыми словами.",
+      "ok": true,
+      "ms": 2728,
+      "intent": "product_question",
+      "reply": "«Синоникс» — это решение для контролируемого обмена данными между двумя сетями, в том числе когда одну из них нельзя напрямую соединять с другой. Он ставится на границе сетей и пропускает только те потоки, которые вы описали: по конкретным системам, протоколам и портам, в нужную сторону. Для передачи файлов он умеет проверять их по заданным правилам (имя, тип, размер, целостность, внешние проверки) и раскладывать по хранилищам, а для сетевых потоков — работать как точка-точка между системами.",
+      "ops": [],
+      "operation_errors": [],
+      "questions": [
+        "Что нужно передавать между сетями?"
+      ],
+      "calls": [
+        {
+          "session_id": "novice-eval",
+          "turn_id": "novice-08",
+          "call_id": "ed636fbc-2ff3-4a99-ab68-e17dc079e184",
+          "model_id": "deepseek/deepseek-v4.1-flash",
+          "provider": null,
+          "purpose": "extract",
+          "started_at": "2026-11-21T10:28:53.937Z",
+          "prices": {
+            "input": 0.05,
+            "output": 0.199
+          },
+          "attempt": 1,
+          "finished_at": "2026-11-21T10:28:56.662Z",
+          "status": "ok",
+          "input_tokens": 4492,
+          "output_tokens": 182,
+          "cached_tokens": 2048,
+          "reasoning_tokens": 0,
+          "cost_input_usd": 0.0002246,
+          "cost_output_usd": 0.000036218000000000005,
+          "cost_total_usd": 0.000260818,
+          "actual_cost_usd": null,
+          "usage_source": "provider_response",
+          "provider_response_id": "02179525693450911300f35b2a874e35aceb4d35afb57b8a18806",
+          "raw_usage": {
+            "completion_tokens": 182,
+            "prompt_tokens": 4492,
+            "total_tokens": 4674,
+            "prompt_tokens_details": {
+              "cached_tokens": 2048
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "prompt": "А если нам нужно отправлять файлы в обе стороны между офисом и цехом?",
+      "ok": true,
+      "ms": 2113,
+      "intent": "describe",
+      "reply": "Записал файловый обмен в обе стороны между офисом и цехом.",
+      "ops": [
+        {
+          "op": "upsert_file_flow",
+          "id": "f1",
+          "description": "Обмен файлами между офисом и цехом",
+          "transfers": [
+            {
+              "from": "n1",
+              "to": "n2",
+              "send": null,
+              "receive": null
+            },
+            {
+              "from": "n2",
+              "to": "n1",
+              "send": null,
+              "receive": null
+            }
+          ],
+          "checks": null,
+          "differentChecks": null,
+          "isolation": null,
+          "users": null
+        }
+      ],
+      "operation_errors": [],
+      "questions": [
+        "Между какими двумя сетями нужен обмен? Опишите вторую сеть."
+      ],
+      "calls": [
+        {
+          "session_id": "novice-eval",
+          "turn_id": "novice-09",
+          "call_id": "f9ebe3fd-0501-4ea3-aa1c-e84ae40418ad",
+          "model_id": "deepseek/deepseek-v4.1-flash",
+          "provider": null,
+          "purpose": "extract",
+          "started_at": "2026-11-21T10:28:56.664Z",
+          "prices": {
+            "input": 0.05,
+            "output": 0.199
+          },
+          "attempt": 1,
+          "finished_at": "2026-11-21T10:28:58.776Z",
+          "status": "ok",
+          "input_tokens": 3707,
+          "output_tokens": 128,
+          "cached_tokens": 2048,
+          "reasoning_tokens": 0,
+          "cost_input_usd": 0.00018535000000000003,
+          "cost_output_usd": 0.000025472000000000003,
+          "cost_total_usd": 0.00021082200000000005,
+          "actual_cost_usd": null,
+          "usage_source": "provider_response",
+          "provider_response_id": "02179525693717099b13dab45b2d10982c2cf34f4d4639d815db5",
+          "raw_usage": {
+            "completion_tokens": 128,
+            "prompt_tokens": 3707,
+            "total_tokens": 3835,
+            "prompt_tokens_details": {
+              "cached_tokens": 2048
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "prompt": "У нас уже стоит межсетевой экран. Зачем тогда ещё это устройство?",
+      "ok": true,
+      "ms": 2701,
+      "intent": "product_question",
+      "reply": "«Синоникс» не заменяет межсетевой экран, а работает в связке с ним. МЭ создаёт базовую защиту и фильтрует то, что «Синоникс» сам не разбирает — содержимое обычных потоков TCP и UDP (например, NTP), тогда как «Синоникс» передаёт между сетями только разрешённые правилами потоки данных и файлы, фильтрует промышленные протоколы (MQTT, Modbus TCP, МЭК 104) по структуре и проверяет файлы. При передаче данных он «пересобирает» только нижние четыре уровня модели OSI и содержимое обычного трафика не анализирует, поэтому его и рекомендуется совмещать с другими средствами защиты.",
+      "ops": [],
+      "operation_errors": [],
+      "questions": [
+        "Что нужно передавать между сетями?"
+      ],
+      "calls": [
+        {
+          "session_id": "novice-eval",
+          "turn_id": "novice-10",
+          "call_id": "00784e30-4077-44c6-8fc2-5187e03c255d",
+          "model_id": "deepseek/deepseek-v4.1-flash",
+          "provider": null,
+          "purpose": "extract",
+          "started_at": "2026-11-21T10:28:58.779Z",
+          "prices": {
+            "input": 0.05,
+            "output": 0.199
+          },
+          "attempt": 1,
+          "finished_at": "2026-11-21T10:29:01.478Z",
+          "status": "ok",
+          "input_tokens": 4637,
+          "output_tokens": 223,
+          "cached_tokens": 2048,
+          "reasoning_tokens": 0,
+          "cost_input_usd": 0.00023185000000000002,
+          "cost_output_usd": 0.000044377000000000006,
+          "cost_total_usd": 0.00027622700000000004,
+          "actual_cost_usd": null,
+          "usage_source": "provider_response",
+          "provider_response_id": "0217952569393868792bd17575462d883d5a21b523815c564e35e",
+          "raw_usage": {
+            "completion_tokens": 223,
+            "prompt_tokens": 4637,
+            "total_tokens": 4860,
+            "prompt_tokens_details": {
+              "cached_tokens": 2048
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -39,6 +39,18 @@ async function post(app: any, url: string, body?: unknown) {
 }
 
 describe('цикл сессии', () => {
+  it('прикладывает снимок схемы к ответу на просьбу построить диаграмму и сохраняет его в истории', async () => {
+    const { app } = setup((input) => input.text === 'описание' ? { intent: 'describe', ops: fixtures.F02 } : { intent: 'question_about_solution', ops: [], reply: 'Схема готова.' });
+    const session = (await post(app, '/api/sessions')).json;
+    await post(app, `/api/sessions/${session.id}/messages`, { text: 'описание' });
+    const result = await post(app, `/api/sessions/${session.id}/messages`, { text: 'Нарисуй диаграмму' });
+    const turn = result.json.history.at(-1);
+    expect(turn.diagramXml).toContain('<mxfile');
+    const saved = await app.inject({ method: 'GET', url: `/api/sessions/${session.id}` });
+    expect(saved.json().history.at(-1).diagramXml).toBe(turn.diagramXml);
+    await app.close();
+  });
+
   it('описание → готовый результат с JSON, drawio и учётом стоимости', async () => {
     const { app } = setup(() => ({ intent: 'describe', ops: fixtures.F02 }));
     const s = (await post(app, '/api/sessions')).json;
